@@ -146,3 +146,4 @@ Documentație completă API în `API_SPEC.md`.
 | `JWT_SECRET` | Secretul pentru semnarea token-urilor JWT |
 
 > Fișierul `.env` nu se urcă niciodată pe GitHub.
+
