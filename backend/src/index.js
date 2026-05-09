@@ -1,11 +1,12 @@
-const authRoutes=require('./routes/auth');
+require('dotenv').config(); //require este echivalent cu import
+//rutele sunt adrese. cand frontendu face un request, serveurl stie sa trimita datele de la chiriasi
+const authRoutes=require('./routes/auth'); // .=ramai unde estei; ..=urca un nivel in ierarhie; ./=ramai in acelasi folder
 const chiriasRoutes=require('./routes/chirias');
 const apartamenteRoutes=require('./routes/apartamente');
 const facturiRoutes=require('./routes/facturi');
 const ticketsRoutes=require('./routes/tickets');
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
