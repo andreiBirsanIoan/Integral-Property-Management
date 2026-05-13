@@ -1,6 +1,6 @@
 require('dotenv').config(); //require este echivalent cu import
-//rutele sunt adrese. cand frontendu face un request, serveurl stie sa trimita datele de la chiriasi
-const authRoutes=require('./routes/auth'); // .=ramai unde estei; ..=urca un nivel in ierarhie; ./=ramai in acelasi folder
+//rutele sunt adrese. cand frontendul face un request, serverul stie sa trimita datele de la chiriasi
+const authRoutes=require('./routes/auth'); // .=ramai unde esti; ..=urca un nivel in ierarhie; ./=ramai in acelasi folder
 const chiriasRoutes=require('./routes/chirias');
 const apartamenteRoutes=require('./routes/apartamente');
 const facturiRoutes=require('./routes/facturi');
