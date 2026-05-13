@@ -1,5 +1,6 @@
 const express=require('express');
 const router=express.Router();
-router.get('/',(req,res)=> res.json({mesaj:'GET apartamente'}));
-router.post('/',(req,res)=> res.json({mesaj:'POST apartamente'}));
+const auth=require('../middleware/auth');
+const {getApartamente}=require('../controllers/apartamenteController');
+router.get('/',auth,getApartamente);
 module.exports=router;
