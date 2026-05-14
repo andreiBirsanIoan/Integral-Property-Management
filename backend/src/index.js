@@ -13,8 +13,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-app.use('/api/auth',authRoutes);
-app.use('/api/chirias',chiriasRoutes);
+app.use('/api/auth',authRoutes); 
+app.use('/api/chirias',chiriasRoutes); 
 app.use('/api/apartamente',apartamenteRoutes);
 app.use('/api/facturi',facturiRoutes);
 app.use('/api/tickets',ticketsRoutes);

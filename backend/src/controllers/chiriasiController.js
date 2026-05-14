@@ -11,4 +11,15 @@ const getChiriasi=async(req,res)=>{ //functia care se executa cand cineva face u
         res.status(500).json({error:err.message});
     }
 };
-module.exports={getChiriasi}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
+const addChirias=async(req,res)=>{
+    try{
+        const{user_id,apartament_id,data_contract,data_expirare}=req.body;//extragi datele necesare din corpul cererii
+        await db.query('INSERT INTO chiriasi (user_id, apartament_id, data_contract, data_expirare, activ) VALUES (?, ?, ?, ?, 1)', [user_id, apartament_id, data_contract, data_expirare]);//executi un query SQL pentru a adauga un nou chirias in baza de date. Setezi activ la 1 pentru a marca chiriasul ca fiind activ.
+        res.json({message:'Chirias adaugat cu succes'}); //Trimiţi un mesaj de succes înapoi ca JSON.IN cazul în care adăugarea a fost cu succes, returnezi un mesaj de confirmare către frontend.
+    }
+    catch(err)
+    {
+        res.status(500).json({error:err.message});
+    }
+}
+module.exports={getChiriasi,addChirias}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
