@@ -4,11 +4,11 @@ USE ipm;
 -- ATENTIE!!!! 
 -- Parolele sunt doar hash-uri bcrypt pentru test
 
-INSERT INTO users (nume, email, parola, rol, telefon) VALUES
-('Admin Agentie','admin@ipm.ro','$2b$10$hashadminexemplu123456', 'admin', '0700000001'),
-('Ion Popescu', 'ion@ipm.ro', '$2b$10$hashproprietarexemplu', 'proprietar', '0700000002'),
-('Maria Ionescu', 'maria@ipm.ro', '$2b$10$hashchirias1exemplu', 'chirias', '0700000003'),
-('Andrei Constantin','andrei@ipm.ro', '$2b$10$hashchirias2exemplu', 'chirias', '0700000004');
+INSERT INTO users (nume, email, parola, rol, telefon, verified) VALUES
+('Admin Agentie','admin@ipm.ro','$2b$10$hashadminexemplu123456', 'admin', '0700000001', 1),
+('Ion Popescu', 'ion@ipm.ro', '$2b$10$hashproprietarexemplu', 'proprietar', '0700000002', 1),
+('Maria Ionescu', 'maria@ipm.ro', '$2b$10$hashchirias1exemplu', 'chirias', '0700000003', 1),
+('Andrei Constantin','andrei@ipm.ro', '$2b$10$hashchirias2exemplu', 'chirias', '0700000004', 1);
 
 -- Apartamente
 
