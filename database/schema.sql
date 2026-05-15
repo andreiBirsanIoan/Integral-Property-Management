@@ -12,8 +12,6 @@ CREATE TABLE IF NOT EXISTS users (
     parola VARCHAR(255) NOT NULL, -- stocat ca hash bcrypt, niciodata plain text!!!
     rol VARCHAR (50) DEFAULT 'chirias', -- admin, proprietar, chirias
     telefon VARCHAR(15),
-    verified      TINYINT(1) DEFAULT 0,          -- 0 = neconfirmat, 1 = email confirmat
-    reset_token   VARCHAR(255),                  -- token pt "am uitat parola"
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,10 +35,7 @@ CREATE TABLE IF NOT EXISTS apartamente (
 
 CREATE TABLE IF NOT EXISTS chiriasi (
     id INT AUTO_INCREMENT PRIMARY  KEY,
-
     user_id INT REFERENCES users(id) ON DELETE SET NULL, 
-    user_id INT REFERENCES users(id) ON DELETE SET NULL, -- contul de login al chiriasului
-    user_id INT REFERENCES users(id) ON DELETE SET NULL, --contul de login al chiriasului
     apartament_id INT REFERENCES apartamente(id) ON DELETE SET NULL, -- apartamentul in care sta
     data_contract DATE NOT NULL,  -- data de inceput al contractului
     data_expirare DATE,           -- data de sfarsit al contractului (NULL=nedeterminat)
