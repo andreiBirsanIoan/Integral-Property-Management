@@ -12,11 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
     parola VARCHAR(255) NOT NULL, -- stocat ca hash bcrypt, niciodata plain text!!!
     rol VARCHAR (50) DEFAULT 'chirias', -- admin, proprietar, chirias
     telefon VARCHAR(15),
-<<<<<<< HEAD
     verified      TINYINT(1) DEFAULT 0,          -- 0 = neconfirmat, 1 = email confirmat
     reset_token   VARCHAR(255),                  -- token pt "am uitat parola"
-=======
->>>>>>> aa12662c126c7066ec96f4f4a7fc36a9101ed7cf
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
