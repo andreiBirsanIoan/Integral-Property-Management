@@ -1,5 +1,3 @@
--- date de test
-
 USE ipm;
 
 -- Users
@@ -38,3 +36,4 @@ INSERT INTO tickets (apartament_id, creat_de, titlu, descriere, status) VALUES
 (1, 3, 'Calorifer defect', 'Caloriferul din dormitor nu functioneaza de 3 zile.', 'open'),
 (2, 4, 'Usa de la intrare', 'Usa scrâțâie tare si nu se inchide bine.',             'in_progress'),
 (1, 2, 'Verificare instalatie', 'Proprietarul solicita verificare anuala instalatie.',  'resolved');
+
