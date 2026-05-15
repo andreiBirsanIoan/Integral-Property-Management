@@ -1,5 +1,6 @@
 const express=require('express');
 const router=express.Router();
-router.get('/',(req,res)=> res.json({mesaj:'GET facturi'}));
-router.post('/',(req,res)=> res.json({mesaj:'POST facturi'}));
+const auth=require('../middleware/auth');
+const {getFacturi}=require('../controllers/facturiController');
+router.get('/',auth,getFacturi);
 module.exports=router;

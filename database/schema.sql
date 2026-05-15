@@ -37,11 +37,10 @@ CREATE TABLE IF NOT EXISTS apartamente (
 
 CREATE TABLE IF NOT EXISTS chiriasi (
     id INT AUTO_INCREMENT PRIMARY  KEY,
-<<<<<<< HEAD
+
+    user_id INT REFERENCES users(id) ON DELETE SET NULL, 
     user_id INT REFERENCES users(id) ON DELETE SET NULL, -- contul de login al chiriasului
-=======
     user_id INT REFERENCES users(id) ON DELETE SET NULL, --contul de login al chiriasului
->>>>>>> aa12662c126c7066ec96f4f4a7fc36a9101ed7cf
     apartament_id INT REFERENCES apartamente(id) ON DELETE SET NULL, -- apartamentul in care sta
     data_contract DATE NOT NULL,  -- data de inceput al contractului
     data_expirare DATE,           -- data de sfarsit al contractului (NULL=nedeterminat)
