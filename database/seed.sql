@@ -4,11 +4,19 @@ USE ipm;
 -- ATENTIE!!!! 
 -- Parolele sunt doar hash-uri bcrypt pentru test
 
+
 INSERT INTO users (nume, email, parola, rol, telefon) VALUES
 ('Admin Agentie','admin@ipm.ro','$2b$10$Z1xHPAbCqnT35aTuZjvPneZz/utbUiugIoVQmP4R0bybtbzIt1cQO', 'admin', '0700000001'),
 ('Ion Popescu', 'ion@ipm.ro', '$2b$10$AARDXBaOVjMIfdsmbYvHDeLgQ5R9QMFeUIsYT/Z6f80cm79O1jW42', 'proprietar', '0700000002'),
 ('Maria Ionescu', 'maria@ipm.ro', '$2b$10$9iNzSYE0moN0Es0cL/b1MOXIpR0a2gAyGWU0aR9YXeZ.ALP2h/Ou.', 'chirias', '0700000003'),
 ('Andrei Constantin','andrei@ipm.ro', '$2b$10$ExjfYYoB4leQlUzy5dAk/ugWpBqm86g8aw3Fy42YvCMMnFC5Bs7dW', 'chirias', '0700000004');
+
+INSERT INTO users (nume, email, parola, rol, telefon, verified) VALUES
+('Admin Agentie','admin@ipm.ro','$2b$10$hashadminexemplu123456', 'admin', '0700000001', 1),
+('Ion Popescu', 'ion@ipm.ro', '$2b$10$hashproprietarexemplu', 'proprietar', '0700000002', 1),
+('Maria Ionescu', 'maria@ipm.ro', '$2b$10$hashchirias1exemplu', 'chirias', '0700000003', 1),
+('Andrei Constantin','andrei@ipm.ro', '$2b$10$hashchirias2exemplu', 'chirias', '0700000004', 1);
+
 
 -- Apartamente
 
