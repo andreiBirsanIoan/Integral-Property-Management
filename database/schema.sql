@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS apartamente (
 );
 
 CREATE TABLE IF NOT EXISTS chiriasi (
+
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE SET NULL,
     apartament_id INT REFERENCES apartamente(id) ON DELETE SET NULL,
@@ -31,6 +32,18 @@ CREATE TABLE IF NOT EXISTS chiriasi (
     data_expirare DATE,
     document_path VARCHAR(500),
     activ TINYINT(1) DEFAULT 1,
+
+    id INT AUTO_INCREMENT PRIMARY  KEY,
+
+    user_id INT REFERENCES users(id) ON DELETE SET NULL, 
+    user_id INT REFERENCES users(id) ON DELETE SET NULL, -- contul de login al chiriasului
+    user_id INT REFERENCES users(id) ON DELETE SET NULL, --contul de login al chiriasului
+    apartament_id INT REFERENCES apartamente(id) ON DELETE SET NULL, -- apartamentul in care sta
+    data_contract DATE NOT NULL,  -- data de inceput al contractului
+    data_expirare DATE,           -- data de sfarsit al contractului (NULL=nedeterminat)
+    document_path VARCHAR(500), -- calea catre documentul scanat 
+    activ TINYINT(1) DEFAULT 1, -- 1 = chirias activ, 0 = contract incheiat
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
