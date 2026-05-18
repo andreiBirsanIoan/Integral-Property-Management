@@ -27,5 +27,24 @@ const login = async (req, res) => {
     res.status(500).json({ eroare: err.message });
   }
 };
+const register = async (req, res) => {
+  try {
+    const { nume, email, parola, telefon, rol } = req.body;
+    
+    const [exists] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (exists.length > 0)
+      return res.status(400).json({ eroare: 'Email-ul este deja folosit.' });
 
-module.exports = { login };//exporta functia login pentru a putea fi folosita in alte fisiere, cum ar fi rutele de autentificare din auth.js
+    const hash = await bcrypt.hash(parola, 10);
+    
+    await db.query(
+      'INSERT INTO users (nume, email, parola, telefon, rol) VALUES (?, ?, ?, ?, ?)',
+      [nume, email, hash, telefon || null, rol || 'chirias']
+    );
+
+    res.status(201).json({ mesaj: 'Cont creat cu succes.' });
+  } catch (err) {
+    res.status(500).json({ eroare: err.message });
+  }
+};
+module.exports = { login,register };//exporta functia login pentru a putea fi folosita in alte fisiere, cum ar fi rutele de autentificare din auth.js
