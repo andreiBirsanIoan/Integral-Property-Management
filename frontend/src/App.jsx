@@ -4,6 +4,18 @@ import './App.css'
 function App() {
   const [rol, setRol] = useState('chirias')
   const [pagina, setPagina] = useState('login') // 'login' sau 'register'
+  const [email, setEmail] = useState('')
+  const [parola, setParola] = useState('')
+
+  const handleLogin = async () => {
+    const response = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, parola })
+    })
+    const data = await response.json()
+    console.log(data)
+  }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '100vh' }}>
@@ -47,17 +59,17 @@ function App() {
               <label style={{ fontSize: '10px', color: '#8AAFC2', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Email</label>
               <div style={{ background: '#0D1B2A', border: '0.5px solid #1A3A50', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#4A8FA8' }}>✉️</span>
-                <input placeholder="admin@ipm.ro" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
+                <input value={email} onChange={(e) => setEmail(e.target.value)}  placeholder="admin@ipm.ro" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
               </div>
             </div>
             <div>
               <label style={{ fontSize: '10px', color: '#8AAFC2', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Parolă</label>
               <div style={{ background: '#0D1B2A', border: '0.5px solid #1A3A50', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#4A8FA8' }}>🔒</span>
-                <input type="password" placeholder="••••••••" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
+                <input type="password" value={parola} onChange={(e) => setParola(e.target.value)}  placeholder="••••••••" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
               </div>
             </div>
-            <button style={{ background: '#2A7F9E', border: 'none', borderRadius: '8px', padding: '14px', color: '#E8EEF2', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>Conectează-te</button>
+            <button onClick={handleLogin} style={{ background: '#2A7F9E', border: 'none', borderRadius: '8px', padding: '14px', color: '#E8EEF2', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>Conectează-te</button>
             <div style={{ textAlign: 'center', fontSize: '12px', color: '#8AAFC2' }}>
               Nu ai cont? <span onClick={() => setPagina('register')} style={{ color: '#4A8FA8', cursor: 'pointer', fontWeight: '500' }}>Înregistrează-te</span>
             </div>
