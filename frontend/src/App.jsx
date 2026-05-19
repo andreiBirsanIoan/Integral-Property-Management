@@ -32,6 +32,7 @@ function App() {
     localStorage.setItem('token', data.token)
     window.location.href = '/dashboard'
     console.log(data)
+    localStorage.setItem('token', data.token)
   }
 
   return (
