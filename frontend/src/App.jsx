@@ -7,6 +7,21 @@ function App() {
   const [email, setEmail] = useState('')
   const [parola, setParola] = useState('')
 
+  const [numeReg, setNumeReg] = useState('')
+  const [emailReg, setEmailReg] = useState('')
+  const [parolaReg, setParolaReg] = useState('')
+  const [telefonReg, setTelefonReg] = useState('')
+
+  const handleRegister = async () => {
+    const response = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nume: numeReg, email: emailReg, parola: parolaReg, telefon: telefonReg, rol })
+    })
+    const data = await response.json()
+    console.log(data)
+  }
+
   const handleLogin = async () => {
     const response = await fetch('http://localhost:5000/api/auth/login', {
       method: 'POST',
@@ -14,6 +29,8 @@ function App() {
       body: JSON.stringify({ email, parola })
     })
     const data = await response.json()
+    localStorage.setItem('token', data.token)
+    window.location.href = '/dashboard'
     console.log(data)
   }
 
@@ -88,31 +105,31 @@ function App() {
               <label style={{ fontSize: '10px', color: '#8AAFC2', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Nume complet</label>
               <div style={{ background: '#0D1B2A', border: '0.5px solid #1A3A50', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#4A8FA8' }}>👤</span>
-                <input placeholder="Maria Ionescu" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
+                <input value={numeReg} onChange={(e) => setNumeReg(e.target.value)} placeholder="Maria Ionescu" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
               </div>
             </div>
             <div>
               <label style={{ fontSize: '10px', color: '#8AAFC2', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Email</label>
               <div style={{ background: '#0D1B2A', border: '0.5px solid #1A3A50', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#4A8FA8' }}>✉️</span>
-                <input placeholder="maria@ipm.ro" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
+                <input value={emailReg} onChange={(e) => setEmailReg(e.target.value)} placeholder="maria@ipm.ro" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
               </div>
             </div>
             <div>
               <label style={{ fontSize: '10px', color: '#8AAFC2', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Telefon</label>
               <div style={{ background: '#0D1B2A', border: '0.5px solid #1A3A50', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#4A8FA8' }}>📞</span>
-                <input placeholder="0700 000 000" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
+                <input value={telefonReg} onChange={(e) => setTelefonReg(e.target.value)} placeholder="0700 000 000" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
               </div>
             </div>
             <div>
               <label style={{ fontSize: '10px', color: '#8AAFC2', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Parolă</label>
               <div style={{ background: '#0D1B2A', border: '0.5px solid #1A3A50', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ color: '#4A8FA8' }}>🔒</span>
-                <input type="password" placeholder="••••••••" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
+                <input value={parolaReg} onChange={(e) => setParolaReg(e.target.value)} type="password" placeholder="••••••••" style={{ background: 'transparent', border: 'none', outline: 'none', color: '#E8EEF2', fontSize: '13px', width: '100%' }} />
               </div>
             </div>
-            <button style={{ background: '#2A7F9E', border: 'none', borderRadius: '8px', padding: '14px', color: '#E8EEF2', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>Creează cont</button>
+            <button onClick={handleRegister} style={{ background: '#2A7F9E', border: 'none', borderRadius: '8px', padding: '14px', color: '#E8EEF2', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}>Creează cont</button>
             <div style={{ textAlign: 'center', fontSize: '12px', color: '#8AAFC2' }}>
               Ai deja cont? <span onClick={() => setPagina('login')} style={{ color: '#4A8FA8', cursor: 'pointer', fontWeight: '500' }}>Conectează-te</span>
             </div>
