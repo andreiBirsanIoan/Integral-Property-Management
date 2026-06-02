@@ -9,7 +9,7 @@ function Dashboard() {
   useEffect(() => {
     const headers = { Authorization: `Bearer ${token}` }
 
-    fetch('http://localhost:5000/api/chiriasi', { headers })
+    fetch('http://localhost:5000/api/chirias', { headers })
       .then(r => r.json()).then(setChiriasi)
 
     fetch('http://localhost:5000/api/facturi', { headers })
