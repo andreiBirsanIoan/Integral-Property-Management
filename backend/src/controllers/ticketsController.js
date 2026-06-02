@@ -9,4 +9,18 @@ const getTickets=async(req,res)=>{ //functia care se executa cand cineva face un
         res.status(500).json({error:err.message});
     }
 };
-module.exports={getTickets}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
+const putTickets=async(req,res)=>{
+    const{id}=req.params;
+    const{status}=req.body;
+    try{
+        const [result]=await db.query('UPDATE tickets SET status=? where id=?',[status,id]);
+       if(result.affectedRows==0){
+        return res.status(404).json({message:"Tichetul nu a fost gasit"});
+       }
+        res.status(201).json({message:"Tichet actualizat cu succes"});   
+    }
+    catch(err){
+        res.status(500).json({error:err.message});
+    }
+}
+module.exports={getTickets,putTickets}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
