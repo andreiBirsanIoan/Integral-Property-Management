@@ -22,4 +22,37 @@ const addChirias=async(req,res)=>{
         res.status(500).json({error:err.message});
     }
 }
-module.exports={getChiriasi,addChirias}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
+const updateChirias=async(req,res)=>{
+    const {id}=req.params;
+    const{data_expirare,activ}=req.body;
+    try{
+        const [result]=await db.query('UPDATE chiriasi SET data_expirare=?, activ=? WHERE id=?',
+            [data_expirare,activ,id]
+        );
+        if(result.affectedRows==0)
+        {
+            return res.status(404).json({message:"Chiriasul nu a fost gasit."});
+
+        }
+        res.json({message:"Chirias modificat cu succes"});
+    }
+    catch(err)
+    {
+        res.status(400).json({error:err.message});
+    }
+}
+const deleteChirias=async(req,res)=>{
+    const {id}=req.params;
+    try{
+        const[result]=await db.query('UPDATE chiriasi SET activ=0 WHERE id=?',[id]);
+        if(result.affectedRows==0)
+        {
+            return res.status(404).json({message:"Chiriasul nu a fost gasit."});
+        }
+        res.json({message:"Contract incheiat cu succes"});
+    }
+    catch(err){
+        res.status(500).json({error:err.message});
+    }
+}
+module.exports={getChiriasi,addChirias,updateChirias,deleteChirias}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
