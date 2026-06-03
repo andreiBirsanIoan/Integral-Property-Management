@@ -47,8 +47,9 @@ function Chiriasi() {
           'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({ 
-          email_utilizator: emailUtilizator, 
+          email: emailUtilizator, 
           apartament_id: apartamentId, 
+          data_contract: new Date().toISOString().split('T')[0],
           data_expirare: dataExpirare 
         })
       });
@@ -61,7 +62,7 @@ function Chiriasi() {
         fetchChiriasi();
       } else {
         const errorData = await response.json();
-        alert('Eroare: ' + errorData.error);
+        alert('Eroare de la server: ' + (errorData.error || errorData.message || 'Eroare necunoscută'));
       }
     } catch (error) {
       console.error(error);

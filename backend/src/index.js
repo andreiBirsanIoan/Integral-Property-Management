@@ -1,4 +1,5 @@
-require('dotenv').config(); //require este echivalent cu import
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 //rutele sunt adrese. cand frontendul face un request, serverul stie sa trimita datele de la chiriasi
 const authRoutes=require('./routes/auth'); // .=ramai unde esti; ..=urca un nivel in ierarhie; ./=ramai in acelasi folder
 const chiriasRoutes=require('./routes/chirias');

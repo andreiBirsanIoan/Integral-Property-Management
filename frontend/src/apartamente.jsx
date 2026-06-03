@@ -8,7 +8,9 @@ function Apartamente() {
 
   const [adresa, setAdresa] = useState('');
   const [etaj, setEtaj] = useState('');
-
+  const [numarCamere, setNumarCamere] = useState(1);
+  const [pretChirie, setPretChirie] = useState('');
+  const [observatii, setObservatii] = useState('');
   const getTokenData = () => {
     const token = localStorage.getItem('token');
     if (!token) return {};
@@ -36,9 +38,9 @@ function Apartamente() {
     fetchApartamente();
   }, []);
 
-  const handleSave = async () => {
+const handleSave = async () => {
     const token = localStorage.getItem('token');
-    const proprietar_id = getTokenData().id; 
+    const proprietar_id = getTokenData().id || null; 
 
     try {
       const response = await fetch('http://localhost:5000/api/apartamente', {
@@ -47,20 +49,32 @@ function Apartamente() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
-        body: JSON.stringify({ adresa, etaj, proprietar_id })
+        // Trimitem toate cheile necesare, convertite corect la tipurile de date din MySQL
+        body: JSON.stringify({ 
+          adresa, 
+          etaj: etaj ? parseInt(etaj) : null, 
+          numar_camere: parseInt(numarCamere), 
+          pret_chirie: pretChirie ? parseFloat(pretChirie) : 0, 
+          proprietar_id, 
+          observatii 
+        })
       });
 
       if (response.ok) {
         setIsModalOpen(false);
+        // Resetăm formularul
         setAdresa(''); 
         setEtaj(''); 
-        fetchApartamente(); 
+        setNumarCamere(1);
+        setPretChirie('');
+        setObservatii('');
+        fetchApartamente(); // Reîncărcăm lista automat
       } else {
         const errorData = await response.json();
-        alert('Eroare: ' + errorData.error);
+        alert('Eroare: ' + (errorData.error || 'Serverul a respins cererea.'));
       }
     } catch (error) {
-      console.error(error);
+      console.error("Eroare la salvare:", error);
     }
   };
 

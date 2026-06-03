@@ -24,15 +24,32 @@ const getChiriasByID=async(req,res)=>{
         res.status(500).json({error:err.message});
     }
 }
-const addChirias=async(req,res)=>{
-    try{
-        const{user_id,apartament_id,data_contract,data_expirare}=req.body;//extragi datele necesare din corpul cererii
-        await db.query('INSERT INTO chiriasi (user_id, apartament_id, data_contract, data_expirare, activ) VALUES (?, ?, ?, ?, 1)', [user_id, apartament_id, data_contract, data_expirare]);//executi un query SQL pentru a adauga un nou chirias in baza de date. Setezi activ la 1 pentru a marca chiriasul ca fiind activ.
-        res.json({message:'Chirias adaugat cu succes'}); //Trimiţi un mesaj de succes înapoi ca JSON.IN cazul în care adăugarea a fost cu succes, returnezi un mesaj de confirmare către frontend.
+const addChirias = async (req, res) => {
+    try {
+        // În loc de user_id, acum primim email-ul trimis din modalul din React
+        const { email, apartament_id, data_contract, data_expirare } = req.body;
+
+        // Pasul 1: Căutăm utilizatorul în baza de date după email
+        const [users] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+
+        // Pasul 2: Dacă nu există niciun utilizator cu acest email, dăm eroare
+        if (users.length === 0) {
+            return res.status(404).json({ error: `Utilizatorul cu email-ul ${email} nu a fost găsit. Asigură-te că are cont creat!` });
+        }
+
+        // Pasul 3: Extragem id-ul utilizatorului găsit
+        const user_id = users[0].id;
+
+        // Pasul 4: Inserăm chiriașul folosind id-ul găsit și restul datelor
+        await db.query(
+            'INSERT INTO chiriasi (user_id, apartament_id, data_contract, data_expirare, activ) VALUES (?, ?, ?, ?, 1)', 
+            [user_id, apartament_id, data_contract, data_expirare]
+        );
+
+        res.json({ message: 'Chirias adăugat cu succes' });
     }
-    catch(err)
-    {
-        res.status(500).json({error:err.message});
+    catch (err) {
+        res.status(500).json({ error: err.message });
     }
 }
 const updateChirias=async(req,res)=>{
