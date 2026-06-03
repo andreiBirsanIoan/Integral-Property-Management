@@ -1,44 +1,386 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import Apartamente from './apartamente';
+import Chiriasi from './chiriasi';
+import Facturi from './facturi';
 
 function Dashboard() {
-  const [chiriasi, setChiriasi] = useState([])
-  const [facturi, setFacturi] = useState([])
-  const [tickets, setTickets] = useState([])
-  const token = localStorage.getItem('token')
+  const [activeTab, setActiveTab] = useState('Acasă');
+  
+  const [chiriasi, setChiriasi] = useState([]);
+  const [facturi, setFacturi] = useState([]);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const token = localStorage.getItem('token');
+
+  const getProfileFromToken = () => {
+    try {
+      if (!token) return {};
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(window.atob(base64));
+    } catch (e) {
+      return {};
+    }
+  };
+
+  const tokenData = getProfileFromToken();
+  let userData = {};
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) userData = JSON.parse(storedUser);
+  } catch (e) {}
+
+  const numeProprietar = tokenData.nume || userData.nume || localStorage.getItem('nume') || 'Maria Ionescu';
+  const emailProprietar = tokenData.email || userData.email || localStorage.getItem('email') || 'maria.ionescu@gmail.com';
+  const rolProprietar = tokenData.rol || userData.rol || localStorage.getItem('rol') || 'Proprietar';
 
   useEffect(() => {
-    const headers = { Authorization: `Bearer ${token}` }
+    const headers = { Authorization: `Bearer ${token}` };
+    Promise.all([
+      fetch('http://localhost:5000/api/chirias', { headers }).then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('http://localhost:5000/api/facturi', { headers }).then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch('http://localhost:5000/api/tickets', { headers }).then(r => r.ok ? r.json() : []).catch(() => []),
+    ]).then(([c, f, t]) => {
+      if (Array.isArray(c)) setChiriasi(c);
+      if (Array.isArray(f)) setFacturi(f);
+      if (Array.isArray(t)) setTickets(t);
+      setLoading(false);
+    });
+  }, [token]);
 
-    fetch('http://localhost:5000/api/chirias', { headers })
-      .then(r => r.json()).then(setChiriasi)
+  const getInitials = (nume) => {
+    if (!nume || nume.trim() === '') return 'MI';
+    const parts = nume.trim().split(' ');
+    return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+  };
 
-    fetch('http://localhost:5000/api/facturi', { headers })
-      .then(r => r.json()).then(setFacturi)
 
-    fetch('http://localhost:5000/api/tickets', { headers })
-      .then(r => r.json()).then(setTickets)
-  }, [])
+  const menuItems = [
+    { name: 'Acasă', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> },
+    { name: 'Apartamente', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg> },
+    { name: 'Chiriași', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> },
+    { name: 'Facturi', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> },
+    { name: 'Mentenanță', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg> },
+    { name: 'Acte', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> }
+  ];
+
+  const facturiNeplătite = facturi.filter(f => !f.platita || f.platita === 0).length || 5;
+  const ticheteDeschise = tickets.filter(t => t.status?.toLowerCase() === 'deschis' || t.status?.toLowerCase() === 'open').length || 8;
+  const venituri = facturi.filter(f => f.platita || f.platita === 1).reduce((sum, f) => sum + parseFloat(f.suma || 0), 0) || 23568;
+
+  const renderContent = () => {
+    if (loading) return <div style={{ color: '#1E293B', padding: '24px' }}>Se procesează datele...</div>;
+
+    if (activeTab === 'Apartamente') return <Apartamente />;
+    if (activeTab === 'Chiriași') return <Chiriasi />;
+    if (activeTab === 'Facturi') return <Facturi />;
+    
+    if (activeTab !== 'Acasă') return <div style={{ padding: '24px' }}>Secțiunea {activeTab} este în curs de dezvoltare.</div>;
+
+    const facturiAfisate = facturi.length > 0 ? facturi : [
+      { id: 1, nume: 'Duma Bianca', adresa: 'Ap. 7B', suma: '2.800,09', platitaLabel: 'Plătit', initiale: 'DB' },
+      { id: 2, nume: 'Lucas Covacs', adresa: 'Ap. 16C', suma: '2.456,87', platitaLabel: 'Plătit', initiale: 'LC' },
+      { id: 3, nume: 'Aurelian Diana', adresa: 'Ap. 23A', suma: '2.675,06', platitaLabel: 'Restanță', initiale: 'AD' },
+      { id: 4, nume: 'Morar Raul', adresa: 'Ap. 2B', suma: '3.543,87', platitaLabel: 'În așteptare', initiale: 'MR' },
+    ];
+
+    const ticheteAfisate = tickets.length > 0 ? tickets : [
+      { id: 1, titlu: 'Țeavă spartă în baie', adresa: 'Ap. 3B · Maria Ionescu', urgentaLabel: 'Urgent', timp: 'acum 2h' },
+      { id: 2, titlu: 'Calorifer defect', adresa: 'Ap. 19A · Eugenia Maricescu', urgentaLabel: 'Mediu', timp: 'ieri' },
+      { id: 3, titlu: 'Ușă bloc defectă', adresa: 'Ap. 5C · Popa George', urgentaLabel: 'Scăzut', timp: 'acum 3 zile' },
+    ];
+
+    return (
+      <div className="content-container">
+        
+        <div className="top-layout">
+          
+          <div className="profile-card">
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#B8D4F4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: '700', color: '#1E3A8A', marginBottom: '16px' }}>
+              {getInitials(numeProprietar)}
+            </div>
+            <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', color: '#1A2F45', textAlign: 'center', fontWeight: '700' }}>{numeProprietar}</h2>
+            <div style={{ color: '#8AAFC2', fontSize: '13px', fontWeight: '500', marginBottom: '12px' }}>{rolProprietar}</div>
+            
+            <div style={{ background: '#A7F3D0', color: '#065F46', padding: '4px 16px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', textTransform: 'lowercase', marginBottom: '32px' }}>
+              contract activ
+            </div>
+            
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
+              <ProfileRow label="Email" value={emailProprietar} />
+              <ProfileRow label="Telefon" value="0771 567 893" />
+              <ProfileRow label="Contract" value="1 Ian 2025" />
+              <ProfileRow label="Expiră" value="9 Iul 2026" noBorder />
+            </div>
+          </div>
+
+          <div className="stats-grid">
+            <StatCard topText="CHIRIAȘI ACTIVI" value="24" bottomText="+2 luna aceasta" bottomColor="#10B981" />
+            <StatCard topText="FACTURI NEPLĂTITE" value={facturiNeplătite} bottomText="Scadente în 6 zile" bottomColor="#F59E0B" />
+            <StatCard topText="TICHETE DESCHISE" value={ticheteDeschise} bottomText="2 urgente" bottomColor="#60A5FA" />
+            
+            <div style={{ background: '#2E435E', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
+              <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>Venituri Mai</div>
+              <div style={{ color: '#fff', fontSize: '32px', fontWeight: '800', lineHeight: 1 }}>{venituri.toLocaleString('ro-RO')}</div>
+              <div style={{ color: '#7FA1C3', fontSize: '11px', marginTop: '8px' }}>lei · 79% colectat</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bottom-layout">
+          
+          <div className="recent-invoices glass-panel">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '16px', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: '#1A2F45', fontSize: '16px', fontWeight: '700' }}>Facturi recente</h3>
+              <span onClick={() => setActiveTab('Facturi')} style={{ color: '#93C5FD', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Vezi toate</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr', padding: '0 10px 10px 10px', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', color: '#CBD5E1' }}>
+              <div>CHIRIAȘ</div>
+              <div>SUMĂ</div>
+              <div style={{ textAlign: 'center' }}>STATUS</div>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {facturiAfisate.map((f, i) => {
+                const getStatusStyle = (s) => {
+                  if (s === 'Plătit') return { bg: '#A7F3D0', text: '#065F46' };
+                  if (s === 'Restanță') return { bg: '#FBAF5C', text: '#fff' };
+                  return { bg: '#93C5FD', text: '#1E3A8A' };
+                };
+                const sStyle = getStatusStyle(f.platitaLabel);
+
+                return (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr', alignItems: 'center', padding: '14px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                      <div style={{ width: '32px', height: '32px', flexShrink: 0, borderRadius: '50%', background: '#B8D4F4', color: '#1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>
+                        {f.initiale}
+                      </div>
+                      <div style={{ overflow: 'hidden' }}>
+                        <div style={{ color: '#1A2F45', fontWeight: '700', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.nume}</div>
+                        <div style={{ color: '#CBD5E1', fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.adresa}</div>
+                      </div>
+                    </div>
+                    <div style={{ color: '#1A2F45', fontWeight: '700', fontSize: '13px' }}>{f.suma} lei</div>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <span style={{ background: sStyle.bg, color: sStyle.text, padding: '4px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '600', width: '100%', maxWidth: '80px', textAlign: 'center' }}>
+                        {f.platitaLabel}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="urgent-tickets glass-panel dark-glass">
+            <h3 style={{ margin: '0 0 20px 0', color: '#111827', fontSize: '16px', fontWeight: '700' }}>Tichete urgente</h3>
+            
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '5px' }}>
+              {ticheteAfisate.map((t, i) => (
+                <div key={i} style={{ background: '#fff', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', boxSizing: 'border-box', borderLeft: '4px solid #1E293B' }}>
+                  <div style={{ color: '#111827', fontWeight: '700', fontSize: '14px', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.titlu}</div>
+                  <div style={{ color: '#64748B', fontSize: '11px', marginBottom: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.adresa}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: '600' }}>
+                    <span style={{ color: t.urgentaLabel === 'Urgent' ? '#EF4444' : t.urgentaLabel === 'Mediu' ? '#F59E0B' : '#64748B' }}>{t.urgentaLabel}</span>
+                    <span style={{ color: '#CBD5E1' }}>·</span>
+                    <span style={{ color: '#94A3B8' }}>{t.timp}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <>
+      <style>{`
+        .app-wrapper {
+          display: flex; height: 100vh; width: 100%; font-family: "Inter", "Segoe UI", sans-serif;
+          margin: 0; padding: 0; overflow: hidden; background-color: #E6EDF5; box-sizing: border-box;
+        }
+        .sidebar {
+          width: 250px; flex-shrink: 0; background: #0B132B; display: flex; flex-direction: column;
+          color: #fff; z-index: 10; box-sizing: border-box;
+        }
+        .main-area {
+          flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; min-width: 0; box-sizing: border-box;
+        }
+        .top-bar {
+          background: #0B132B; margin: 24px 24px 0 24px; border-radius: 8px; padding: 16px 24px;
+          flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; color: #fff;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; z-index: 2; box-sizing: border-box;
+        }
+        .scrollable-content {
+          position: relative; z-index: 2; flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px;
+          display: flex; flex-direction: column; box-sizing: border-box;
+        }
+        .content-container {
+          display: flex; flex-direction: column; gap: 24px; box-sizing: border-box;
+        }
+        .top-layout {
+          display: flex; gap: 24px; min-width: 0;
+        }
+        .profile-card {
+          background: #fff; border-radius: 16px; padding: 32px 24px; width: 280px; flex-shrink: 0;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; align-items: center; box-sizing: border-box;
+        }
+        .stats-grid {
+          flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; min-width: 0;
+        }
+        .bottom-layout {
+          display: flex; gap: 24px; min-height: 350px; min-width: 0;
+        }
+        .glass-panel {
+          flex: 2; background: rgba(102, 120, 140, 0.85); backdrop-filter: blur(10px);
+          border-radius: 16px; padding: 24px; display: flex; flex-direction: column; box-sizing: border-box; min-width: 0;
+        }
+        .urgent-tickets { flex: 1.2; }
+        .mobile-bottom-nav { display: none; }
+        .desktop-logo { padding: 30px 20px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .top-bar-breadcrumb-icon { display: none; }
 
-      <h2>Chiriasi</h2>
-      {chiriasi.map(c => (
-        <div key={c.id}>{c.nume} — {c.adresa}</div>
-      ))}
+        @media (max-width: 768px) {
+          .app-wrapper { flex-direction: column; background-color: #EAF0F6; }
+          .sidebar { display: none; }
+          .top-bar { margin: 16px; padding: 12px 16px; justify-content: flex-start; gap: 12px; }
+          .top-bar-breadcrumb-icon { display: block; color: #D4AF37; }
+          .top-bar-actions { display: none; }
+          
+          .main-area { margin-bottom: 70px; }
+          .scrollable-content { padding: 16px; }
+          .content-container { gap: 16px; }
+          
+          .top-layout { flex-direction: column; }
+          .profile-card { width: 100%; padding: 24px; }
+          
+          .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+          
+          .bottom-layout { flex-direction: column; min-height: auto; gap: 16px; }
+          .glass-panel { padding: 16px; border-radius: 12px; }
+          .dark-glass { background: #6A7B8E; }
+          
+          .mobile-bottom-nav {
+            display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: 70px;
+            background: #0B132B; z-index: 100; justify-content: space-around; align-items: center;
+            padding: 0 10px; box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+          }
+          .nav-item {
+            padding: 10px; border-radius: 10px; color: #9CA3AF; cursor: pointer; transition: all 0.2s;
+          }
+          .nav-item.active {
+            background: #5277A4; color: #fff;
+          }
+        }
+      `}</style>
 
-      <h2>Facturi</h2>
-      {facturi.map(f => (
-        <div key={f.id}>{f.nume} — {f.suma} RON — {f.platita ? 'Platita' : 'Neplatita'}</div>
-      ))}
+      <div className="app-wrapper">
 
-      <h2>Tickets</h2>
-      {tickets.map(t => (
-        <div key={t.id}>{t.titlu} — {t.status}</div>
-      ))}
-    </div>
-  )
+        <div className="sidebar">
+          <div className="desktop-logo">
+            <img src="/logo.png" alt="Integral Property Management" style={{ width: '120px', marginBottom: '10px', objectFit: 'contain' }} />
+          </div>
+          <div style={{ flex: 1, paddingTop: '10px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            {menuItems.map(item => {
+              const isActive = activeTab === item.name;
+              return (
+                <div key={item.name} onClick={() => setActiveTab(item.name)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 30px', cursor: 'pointer',
+                    background: isActive ? '#1F2937' : 'transparent', 
+                    borderLeft: isActive ? '3px solid #D4AF37' : '3px solid transparent',
+                    color: isActive ? '#fff' : '#9CA3AF', 
+                    fontSize: '14px', fontWeight: '500', transition: 'all 0.2s'
+                  }}>
+                  <span style={{ color: isActive ? '#fff' : '#9CA3AF', display: 'flex' }}>{item.icon}</span> 
+                  {item.name}
+                </div>
+              );
+            })}
+          </div>
+          <div onClick={() => setActiveTab('Setări')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '14px', padding: '20px 30px', cursor: 'pointer', flexShrink: 0,
+              background: activeTab === 'Setări' ? '#1F2937' : 'transparent', 
+              borderLeft: activeTab === 'Setări' ? '3px solid #D4AF37' : '3px solid transparent',
+              color: activeTab === 'Setări' ? '#fff' : '#9CA3AF', fontSize: '14px', fontWeight: '500'
+            }}>
+            <span style={{ display: 'flex' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </span> 
+            Setări
+          </div>
+        </div>
+
+        <div className="main-area">
+          
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: "url('/background.jpeg')", backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 0 }}></div>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(235, 240, 245, 0.75)', zIndex: 1 }}></div>
+
+          <div className="top-bar">
+            <svg className="top-bar-breadcrumb-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
+            
+            <div style={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontWeight: '600', color: '#9CA3AF' }}>Proprietari / </span> 
+              <span style={{ fontWeight: '500' }}>{numeProprietar}</span>
+            </div>
+            
+            <div className="top-bar-actions" style={{ display: 'flex', gap: '20px', color: '#fff', cursor: 'pointer', flexShrink: 0 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            </div>
+          </div>
+
+          <div className="scrollable-content">
+            {renderContent()}
+          </div>
+
+        </div>
+
+        <div className="mobile-bottom-nav">
+          {menuItems.map(item => (
+            <div 
+              key={item.name} 
+              className={`nav-item ${activeTab === item.name ? 'active' : ''}`}
+              onClick={() => setActiveTab(item.name)}
+            >
+              {item.icon}
+            </div>
+          ))}
+          <div 
+              className={`nav-item ${activeTab === 'Setări' ? 'active' : ''}`}
+              onClick={() => setActiveTab('Setări')}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </div>
+        </div>
+
+      </div>
+    </>
+  );
 }
 
-export default Dashboard
+function ProfileRow({ label, value, noBorder }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0', borderBottom: noBorder ? 'none' : '1px solid #F3F4F6', fontSize: '12px' }}>
+      <span style={{ color: '#9CA3AF', fontWeight: '500', flexShrink: 0, marginRight: '10px' }}>{label}</span>
+      <span style={{ color: '#111827', fontWeight: '600', textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</span>
+    </div>
+  );
+}
+
+function StatCard({ topText, value, bottomText, bottomColor }) {
+  return (
+    <div style={{ background: '#fff', borderRadius: '16px', padding: '16px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.03)', boxSizing: 'border-box' }}>
+      <div style={{ color: '#7FA1C3', fontSize: '10px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '16px', textAlign: 'center', textTransform: 'uppercase' }}>{topText}</div>
+      <div style={{ color: '#1A2F45', fontSize: '36px', fontWeight: '800', lineHeight: 1 }}>{value}</div>
+      <div style={{ color: bottomColor, fontSize: '11px', marginTop: '12px', fontWeight: '600', textAlign: 'center', whiteSpace: 'nowrap' }}>{bottomText}</div>
+    </div>
+  );
+}
+
+export default Dashboard;
