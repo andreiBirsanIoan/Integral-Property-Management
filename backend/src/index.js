@@ -24,11 +24,12 @@ app.use('/api/tickets',ticketsRoutes);
 app.get('/', (req, res) => {
   res.json({ message: 'RentFlow API functioneaza!' });
 });
-
+app.use((err, req, res, next) => {
+  const status = err.status || 500;
+  res.status(status).json({ 
+    eroare: err.message || 'Eroare internă server.' 
+  });
+});
 app.listen(PORT, () => {
   console.log(`Server pornit pe portul ${PORT}`);
-});
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ eroare: 'Eroare internă server.' });
 });

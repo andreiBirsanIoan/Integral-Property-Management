@@ -11,6 +11,19 @@ const getChiriasi=async(req,res)=>{ //functia care se executa cand cineva face u
         res.status(500).json({error:err.message});
     }
 };
+const getChiriasByID=async(req,res)=>{
+    const{id}=req.params;
+    try{
+        const [result]=await db.query('SELECT chiriasi.id,users.nume,users.email,users.telefon,apartamente.adresa,chiriasi.data_contract,chiriasi.data_expirare,chiriasi.activ FROM chiriasi JOIN users ON chiriasi.user_id=users.id JOIN apartamente ON chiriasi.apartament_id=apartamente.id WHERE chiriasi.id=?;',[id]);
+        if(result.length==0){
+            return res.status(404).json({message:"Chiriasul nu a fost gasit"});
+        }
+        res.json(result);
+    }
+    catch(err){
+        res.status(500).json({error:err.message});
+    }
+}
 const addChirias=async(req,res)=>{
     try{
         const{user_id,apartament_id,data_contract,data_expirare}=req.body;//extragi datele necesare din corpul cererii
@@ -55,4 +68,4 @@ const deleteChirias=async(req,res)=>{
         res.status(500).json({error:err.message});
     }
 }
-module.exports={getChiriasi,addChirias,updateChirias,deleteChirias}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
+module.exports={getChiriasi,getChiriasByID,addChirias,updateChirias,deleteChirias}; //Exporti funcţia ca să o poţi folosi în fişierul de rute.
