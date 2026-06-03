@@ -23,16 +23,29 @@ function App() {
   }
 
   const handleLogin = async () => {
-    const response = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, parola })
-    })
-    const data = await response.json()
-    localStorage.setItem('token', data.token)
-    window.location.href = '/dashboard'
-    console.log(data)
-    localStorage.setItem('token', data.token)
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, parola })
+      })
+      const data = await response.json()
+      
+      if (response.ok) {
+        // se salveaza datele
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('nume', data.nume) 
+        localStorage.setItem('rol', data.rol)
+        localStorage.setItem('email', email) 
+        
+    
+        window.location.href = '/dashboard'
+      } else {
+        alert(data.eroare || 'Eroare la autentificare');
+      }
+    } catch (error) {
+      console.error("Eroare la conexiunea cu serverul:", error);
+    }
   }
 
   return (
