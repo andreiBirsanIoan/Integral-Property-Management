@@ -11,6 +11,7 @@ function Apartamente() {
   const [numarCamere, setNumarCamere] = useState(1);
   const [pretChirie, setPretChirie] = useState('');
   const [observatii, setObservatii] = useState('');
+
   const getTokenData = () => {
     const token = localStorage.getItem('token');
     if (!token) return {};
@@ -38,7 +39,7 @@ function Apartamente() {
     fetchApartamente();
   }, []);
 
-const handleSave = async () => {
+  const handleSave = async () => {
     const token = localStorage.getItem('token');
     const proprietar_id = getTokenData().id || null; 
 
@@ -49,7 +50,6 @@ const handleSave = async () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
-        // Trimitem toate cheile necesare, convertite corect la tipurile de date din MySQL
         body: JSON.stringify({ 
           adresa, 
           etaj: etaj ? parseInt(etaj) : null, 
@@ -62,19 +62,18 @@ const handleSave = async () => {
 
       if (response.ok) {
         setIsModalOpen(false);
-        // Resetăm formularul
         setAdresa(''); 
         setEtaj(''); 
         setNumarCamere(1);
         setPretChirie('');
         setObservatii('');
-        fetchApartamente(); // Reîncărcăm lista automat
+        fetchApartamente(); 
       } else {
         const errorData = await response.json();
         alert('Eroare: ' + (errorData.error || 'Serverul a respins cererea.'));
       }
     } catch (error) {
-      console.error("Eroare la salvare:", error);
+      console.error(error);
     }
   };
 
@@ -90,6 +89,12 @@ const handleSave = async () => {
   } else if (sortOption === 'adresa_desc') {
     apartamenteAfisate.sort((a, b) => (b.adresa || '').localeCompare(a.adresa || ''));
   }
+
+  const totalApartamente = apartamente.length;
+  const apartamenteOcupate = apartamente.filter(a => a.nume).length;
+  const apartamenteLibere = totalApartamente - apartamenteOcupate;
+  const rataOcupare = totalApartamente > 0 ? Math.round((apartamenteOcupate / totalApartamente) * 100) : 0;
+  const venituriTotale = apartamente.reduce((sum, ap) => sum + (ap.pret_chirie || 0), 0);
 
   return (
     <>
@@ -185,13 +190,12 @@ const handleSave = async () => {
               </button>
             </div>
             <div style={{ fontSize: '14px', fontWeight: '500', color: '#E2E8F0', whiteSpace: 'nowrap' }}>
-              {apartamente.length > 0 ? apartamenteAfisate.length : 48} apartamente
+              {apartamenteAfisate.length} apartamente
             </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '12px', marginBottom: '16px' }}>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>Listă apartamente</h2>
-            <span style={{ color: '#93C5FD', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Vezi toate</span>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', paddingRight: '5px' }}>
@@ -206,7 +210,7 @@ const handleSave = async () => {
               </div>
 
               {loading ? ( <div style={{textAlign: 'center', padding: '40px 20px'}}>Se încarcă datele...</div> ) : 
-                apartamenteAfisate.length === 0 ? ( <div style={{textAlign: 'center', padding: '40px 20px', color: '#CBD5E1', fontSize: '15px', fontWeight: '500'}}>Nu s-au găsit apartamente.</div> ) : (
+                apartamenteAfisate.length === 0 ? ( <div style={{textAlign: 'center', padding: '40px 20px', color: '#CBD5E1', fontSize: '15px', fontWeight: '500'}}>Nu s-au găsit apartamente înregistrate.</div> ) : (
                 apartamenteAfisate.map((ap, index) => (
                   <div key={ap.id || index} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr', gap: '16px', alignItems: 'center', padding: '16px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)', fontSize: '14px', fontWeight: '500' }}>
                     
@@ -230,8 +234,8 @@ const handleSave = async () => {
                       )}
                     </div>
                     
-                    <div style={{ textAlign: 'center', color: '#E2E8F0', fontWeight: '600', fontSize: '13px' }}>1</div>
-                    <div style={{ color: '#E2E8F0', fontWeight: '600', fontSize: '13px', whiteSpace: 'nowrap' }}>750 lei</div>
+                    <div style={{ textAlign: 'center', color: '#E2E8F0', fontWeight: '600', fontSize: '13px' }}>{ap.numar_camere || '-'}</div>
+                    <div style={{ color: '#E2E8F0', fontWeight: '600', fontSize: '13px', whiteSpace: 'nowrap' }}>{ap.pret_chirie || 0} lei</div>
                     
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                       <span style={{ padding: '6px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', width: '70px', textAlign: 'center', flexShrink: 0, background: ap.nume ? '#A7F3D0' : '#FDBA74', color: ap.nume ? '#065F46' : '#92400E' }}>
@@ -243,24 +247,18 @@ const handleSave = async () => {
                 ))
               )}
             </div>
-
-            {apartamenteAfisate.length > 0 && (
-              <div style={{ textAlign: 'center', padding: '20px 0 10px', fontSize: '12px', color: '#CBD5E1', fontWeight: '500' }}>
-                &lt; 1 din 3 &gt;
-              </div>
-            )}
           </div>
         </div>
 
         <div className="stats-section">
-          <StatCard title="TOTAL APARTAMENTE" value={apartamente.length > 0 ? apartamente.length : 48} subtitle="3 blocuri" valueColor="#1A2F45" subtitleColor="#93C5FD" bg="#ffffff" />
-          <StatCard title="OCUPATE" value="40%" subtitle="83% rată de ocupare" valueColor="#059669" subtitleColor="#34D399" bg="#ffffff" />
-          <StatCard title="LIBERE" value={apartamente.length > 0 ? apartamente.filter(a => !a.nume).length : 5} subtitle="2 în mentenanță" valueColor="#B45309" subtitleColor="#EA580C" bg="#ffffff" />
+          <StatCard title="TOTAL APARTAMENTE" value={totalApartamente} subtitle="Înregistrate în sistem" valueColor="#1A2F45" subtitleColor="#93C5FD" bg="#ffffff" />
+          <StatCard title="OCUPATE" value={`${rataOcupare}%`} subtitle="Rată de ocupare" valueColor="#059669" subtitleColor="#34D399" bg="#ffffff" />
+          <StatCard title="LIBERE" value={apartamenteLibere} subtitle="Disponibile" valueColor="#B45309" subtitleColor="#EA580C" bg="#ffffff" />
           
           <div style={{ background: '#2E435E', borderRadius: '12px', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
-            <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>Venituri Mai</div>
-            <div style={{ color: '#fff', fontSize: '40px', fontWeight: '800', lineHeight: 1 }}>23.568</div>
-            <div style={{ color: '#7FA1C3', fontSize: '12px', marginTop: '8px' }}>lei · 79% colectat</div>
+            <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>Total Chirie Lunară</div>
+            <div style={{ color: '#fff', fontSize: '40px', fontWeight: '800', lineHeight: 1 }}>{venituriTotale.toLocaleString('ro-RO')}</div>
+            <div style={{ color: '#7FA1C3', fontSize: '12px', marginTop: '8px' }}>lei potențiali</div>
           </div>
         </div>
 
@@ -271,6 +269,8 @@ const handleSave = async () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <input type="text" placeholder="Adresa (ex: Str. Florilor 10)" value={adresa} onChange={e => setAdresa(e.target.value)} className="modal-input" />
                 <input type="number" placeholder="Etaj" value={etaj} onChange={e => setEtaj(e.target.value)} className="modal-input" />
+                <input type="number" placeholder="Număr Camere" value={numarCamere} onChange={e => setNumarCamere(e.target.value)} className="modal-input" />
+                <input type="number" placeholder="Preț Chirie (lei)" value={pretChirie} onChange={e => setPretChirie(e.target.value)} className="modal-input" />
                 <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
                   <button onClick={() => setIsModalOpen(false)} className="modal-btn-cancel">Anulează</button>
                   <button onClick={handleSave} className="modal-btn-save">Salvează</button>

@@ -31,8 +31,8 @@ function Dashboard() {
     if (storedUser) userData = JSON.parse(storedUser);
   } catch (e) {}
 
-  const numeProprietar = tokenData.nume || userData.nume || localStorage.getItem('nume') || 'Maria Ionescu';
-  const emailProprietar = tokenData.email || userData.email || localStorage.getItem('email') || 'maria.ionescu@gmail.com';
+  const numeProprietar = tokenData.nume || userData.nume || localStorage.getItem('nume') || 'Utilizator Nou';
+  const emailProprietar = tokenData.email || userData.email || localStorage.getItem('email') || 'fara.email@ipm.ro';
   const rolProprietar = tokenData.rol || userData.rol || localStorage.getItem('rol') || 'Proprietar';
 
   useEffect(() => {
@@ -50,11 +50,10 @@ function Dashboard() {
   }, [token]);
 
   const getInitials = (nume) => {
-    if (!nume || nume.trim() === '') return 'MI';
+    if (!nume || nume.trim() === '') return '-';
     const parts = nume.trim().split(' ');
     return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
   };
-
 
   const menuItems = [
     { name: 'Acasă', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> },
@@ -65,9 +64,11 @@ function Dashboard() {
     { name: 'Acte', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> }
   ];
 
-  const facturiNeplătite = facturi.filter(f => !f.platita || f.platita === 0).length || 5;
-  const ticheteDeschise = tickets.filter(t => t.status?.toLowerCase() === 'deschis' || t.status?.toLowerCase() === 'open').length || 8;
-  const venituri = facturi.filter(f => f.platita || f.platita === 1).reduce((sum, f) => sum + parseFloat(f.suma || 0), 0) || 23568;
+  // Calculare strict pe datele reale (fara '|| 5' etc.)
+  const chiriasiActivi = chiriasi.length;
+  const facturiNeplătite = facturi.filter(f => !f.platita || f.platita === 0).length;
+  const ticheteDeschise = tickets.filter(t => t.status?.toLowerCase() === 'deschis' || t.status?.toLowerCase() === 'open').length;
+  const venituri = facturi.filter(f => f.platita || f.platita === 1).reduce((sum, f) => sum + parseFloat(f.suma || 0), 0);
 
   const renderContent = () => {
     if (loading) return <div style={{ color: '#1E293B', padding: '24px' }}>Se procesează datele...</div>;
@@ -77,19 +78,6 @@ function Dashboard() {
     if (activeTab === 'Facturi') return <Facturi />;
     
     if (activeTab !== 'Acasă') return <div style={{ padding: '24px' }}>Secțiunea {activeTab} este în curs de dezvoltare.</div>;
-
-    const facturiAfisate = facturi.length > 0 ? facturi : [
-      { id: 1, nume: 'Duma Bianca', adresa: 'Ap. 7B', suma: '2.800,09', platitaLabel: 'Plătit', initiale: 'DB' },
-      { id: 2, nume: 'Lucas Covacs', adresa: 'Ap. 16C', suma: '2.456,87', platitaLabel: 'Plătit', initiale: 'LC' },
-      { id: 3, nume: 'Aurelian Diana', adresa: 'Ap. 23A', suma: '2.675,06', platitaLabel: 'Restanță', initiale: 'AD' },
-      { id: 4, nume: 'Morar Raul', adresa: 'Ap. 2B', suma: '3.543,87', platitaLabel: 'În așteptare', initiale: 'MR' },
-    ];
-
-    const ticheteAfisate = tickets.length > 0 ? tickets : [
-      { id: 1, titlu: 'Țeavă spartă în baie', adresa: 'Ap. 3B · Maria Ionescu', urgentaLabel: 'Urgent', timp: 'acum 2h' },
-      { id: 2, titlu: 'Calorifer defect', adresa: 'Ap. 19A · Eugenia Maricescu', urgentaLabel: 'Mediu', timp: 'ieri' },
-      { id: 3, titlu: 'Ușă bloc defectă', adresa: 'Ap. 5C · Popa George', urgentaLabel: 'Scăzut', timp: 'acum 3 zile' },
-    ];
 
     return (
       <div className="content-container">
@@ -109,21 +97,21 @@ function Dashboard() {
             
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
               <ProfileRow label="Email" value={emailProprietar} />
-              <ProfileRow label="Telefon" value="0771 567 893" />
-              <ProfileRow label="Contract" value="1 Ian 2025" />
-              <ProfileRow label="Expiră" value="9 Iul 2026" noBorder />
+              <ProfileRow label="Telefon" value="Neconfigurat" />
+              <ProfileRow label="Contract" value="Activ" />
+              <ProfileRow label="Expiră" value="-" noBorder />
             </div>
           </div>
 
           <div className="stats-grid">
-            <StatCard topText="CHIRIAȘI ACTIVI" value="24" bottomText="+2 luna aceasta" bottomColor="#10B981" />
-            <StatCard topText="FACTURI NEPLĂTITE" value={facturiNeplătite} bottomText="Scadente în 6 zile" bottomColor="#F59E0B" />
-            <StatCard topText="TICHETE DESCHISE" value={ticheteDeschise} bottomText="2 urgente" bottomColor="#60A5FA" />
+            <StatCard topText="CHIRIAȘI ACTIVI" value={chiriasiActivi} bottomText="Înregistrați în sistem" bottomColor="#10B981" />
+            <StatCard topText="FACTURI NEPLĂTITE" value={facturiNeplătite} bottomText="Care necesită atenție" bottomColor="#F59E0B" />
+            <StatCard topText="TICHETE DESCHISE" value={ticheteDeschise} bottomText="În curs de rezolvare" bottomColor="#60A5FA" />
             
             <div style={{ background: '#2E435E', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
-              <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>Venituri Mai</div>
+              <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>Venituri Total</div>
               <div style={{ color: '#fff', fontSize: '32px', fontWeight: '800', lineHeight: 1 }}>{venituri.toLocaleString('ro-RO')}</div>
-              <div style={{ color: '#7FA1C3', fontSize: '11px', marginTop: '8px' }}>lei · 79% colectat</div>
+              <div style={{ color: '#7FA1C3', fontSize: '11px', marginTop: '8px' }}>lei încasați</div>
             </div>
           </div>
         </div>
@@ -143,52 +131,62 @@ function Dashboard() {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto' }}>
-              {facturiAfisate.map((f, i) => {
-                const getStatusStyle = (s) => {
-                  if (s === 'Plătit') return { bg: '#A7F3D0', text: '#065F46' };
-                  if (s === 'Restanță') return { bg: '#FBAF5C', text: '#fff' };
-                  return { bg: '#93C5FD', text: '#1E3A8A' };
-                };
-                const sStyle = getStatusStyle(f.platitaLabel);
+              {facturi.length > 0 ? (
+                facturi.map((f, i) => {
+                  const platitaLabel = f.platita ? 'Plătit' : 'Neplătit';
+                  const getStatusStyle = (s) => {
+                    if (s === 'Plătit') return { bg: '#A7F3D0', text: '#065F46' };
+                    return { bg: '#FBAF5C', text: '#fff' };
+                  };
+                  const sStyle = getStatusStyle(platitaLabel);
 
-                return (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr', alignItems: 'center', padding: '14px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                      <div style={{ width: '32px', height: '32px', flexShrink: 0, borderRadius: '50%', background: '#B8D4F4', color: '#1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>
-                        {f.initiale}
+                  return (
+                    <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 1fr', alignItems: 'center', padding: '14px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                        <div style={{ width: '32px', height: '32px', flexShrink: 0, borderRadius: '50%', background: '#B8D4F4', color: '#1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700' }}>
+                          {getInitials(f.nume)}
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                          <div style={{ color: '#1A2F45', fontWeight: '700', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.nume || 'Necunoscut'}</div>
+                          <div style={{ color: '#CBD5E1', fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.descriere || 'Factură'}</div>
+                        </div>
                       </div>
-                      <div style={{ overflow: 'hidden' }}>
-                        <div style={{ color: '#1A2F45', fontWeight: '700', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.nume}</div>
-                        <div style={{ color: '#CBD5E1', fontSize: '11px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.adresa}</div>
+                      <div style={{ color: '#1A2F45', fontWeight: '700', fontSize: '13px' }}>{f.suma} lei</div>
+                      <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <span style={{ background: sStyle.bg, color: sStyle.text, padding: '4px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '600', width: '100%', maxWidth: '80px', textAlign: 'center' }}>
+                          {platitaLabel}
+                        </span>
                       </div>
                     </div>
-                    <div style={{ color: '#1A2F45', fontWeight: '700', fontSize: '13px' }}>{f.suma} lei</div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                      <span style={{ background: sStyle.bg, color: sStyle.text, padding: '4px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: '600', width: '100%', maxWidth: '80px', textAlign: 'center' }}>
-                        {f.platitaLabel}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#94A3B8', fontSize: '13px', fontStyle: 'italic' }}>
+                  Nicio factură înregistrată.
+                </div>
+              )}
             </div>
           </div>
 
           <div className="urgent-tickets glass-panel dark-glass">
-            <h3 style={{ margin: '0 0 20px 0', color: '#111827', fontSize: '16px', fontWeight: '700' }}>Tichete urgente</h3>
+            <h3 style={{ margin: '0 0 20px 0', color: '#111827', fontSize: '16px', fontWeight: '700' }}>Tichete mentenanță</h3>
             
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '5px' }}>
-              {ticheteAfisate.map((t, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', boxSizing: 'border-box', borderLeft: '4px solid #1E293B' }}>
-                  <div style={{ color: '#111827', fontWeight: '700', fontSize: '14px', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.titlu}</div>
-                  <div style={{ color: '#64748B', fontSize: '11px', marginBottom: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.adresa}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: '600' }}>
-                    <span style={{ color: t.urgentaLabel === 'Urgent' ? '#EF4444' : t.urgentaLabel === 'Mediu' ? '#F59E0B' : '#64748B' }}>{t.urgentaLabel}</span>
-                    <span style={{ color: '#CBD5E1' }}>·</span>
-                    <span style={{ color: '#94A3B8' }}>{t.timp}</span>
+              {tickets.length > 0 ? (
+                tickets.map((t, i) => (
+                  <div key={i} style={{ background: '#fff', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', boxSizing: 'border-box', borderLeft: '4px solid #1E293B' }}>
+                    <div style={{ color: '#111827', fontWeight: '700', fontSize: '14px', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.titlu || 'Tichet'}</div>
+                    <div style={{ color: '#64748B', fontSize: '11px', marginBottom: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.nume || 'Fără detalii'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: '600' }}>
+                      <span style={{ color: t.status === 'Deschis' ? '#F59E0B' : '#10B981' }}>{t.status}</span>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#CBD5E1', fontSize: '13px', fontStyle: 'italic' }}>
+                  Niciun tichet de mentenanță.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

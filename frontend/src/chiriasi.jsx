@@ -76,6 +76,31 @@ function Chiriasi() {
     chiriasiAfisati.sort((a, b) => (b.nume || '').localeCompare(a.nume || ''));
   }
 
+
+  const totalChiriasi = chiriasi.length;
+
+  const contracteActive = chiriasi.filter(c => c.activ === 1 || c.activ === true || c.activ === undefined).length;
+  
+
+  const contracteExpiraCurand = chiriasi.filter(c => {
+    if (!c.data_expirare) return false;
+    const dataExp = new Date(c.data_expirare);
+    const azi = new Date();
+    const diffTime = dataExp - azi;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 30;
+  }).length;
+
+  const numarRestante = chiriasi.filter(c => (c.restanta || 0) > 0).length;
+  const sumaRestante = chiriasi.reduce((sum, c) => sum + (parseFloat(c.restanta) || 0), 0);
+
+  // Venituri totale din chiriile lunare curente
+  const venituriTotale = chiriasi.reduce((sum, c) => sum + (parseFloat(c.chirie) || 0), 0);
+  
+  // Obținem dinamic numele lunii curente
+  const luni = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+  const lunaCurenta = luni[new Date().getMonth()];
+
   return (
     <>
       <style>{`
@@ -116,7 +141,6 @@ function Chiriasi() {
           color: #1E293B; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
         }
 
-        /* --- STILURI MODAL REPARATE --- */
         .modal-overlay {
           position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); 
           display: flex; align-items: center; justify-content: center; z-index: 1000;
@@ -151,35 +175,17 @@ function Chiriasi() {
         }
         
         .modal-btn-save:hover { background: #172a6b; }
-        /* ------------------------------- */
 
         @media (max-width: 1024px) {
-          .chiriasi-container {
-            flex-direction: column; 
-            height: auto;
-          }
-          .stats-section {
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          }
+          .chiriasi-container { flex-direction: column; height: auto; }
+          .stats-section { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
         }
 
         @media (max-width: 768px) {
-          .list-section {
-            padding: 16px;
-          }
-          .stats-section {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 80px; 
-          }
-          .dropdown-sort {
-            width: 100%;
-          }
-          .btn-adauga {
-            width: 100%;
-          }
+          .list-section { padding: 16px; }
+          .stats-section { display: flex; flex-direction: column; margin-bottom: 80px; }
+          .dropdown-sort { width: 100%; }
+          .btn-adauga { width: 100%; }
         }
       `}</style>
 
@@ -203,13 +209,12 @@ function Chiriasi() {
               </button>
             </div>
             <div style={{ fontSize: '14px', fontWeight: '500', color: '#CBD5E1', whiteSpace: 'nowrap' }}>
-              {chiriasi.length > 0 ? chiriasiAfisati.length : 36} chiriași
+              {chiriasiAfisati.length} chiriași
             </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '12px', marginBottom: '16px' }}>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>Listă Chiriași</h2>
-            <span style={{ color: '#93C5FD', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Vezi toate</span>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', paddingRight: '5px' }}>
@@ -222,12 +227,12 @@ function Chiriasi() {
               </div>
 
               {loading ? ( <div style={{textAlign: 'center', padding: '40px 20px'}}>Se încarcă datele...</div> ) : 
-                chiriasiAfisati.length === 0 ? ( <div style={{textAlign: 'center', padding: '40px 20px', color: '#CBD5E1', fontSize: '15px', fontWeight: '500'}}>Nu s-au găsit chiriași.</div> ) : (
+                chiriasiAfisati.length === 0 ? ( <div style={{textAlign: 'center', padding: '40px 20px', color: '#CBD5E1', fontSize: '15px', fontWeight: '500'}}>Nu s-au găsit chiriași înregistrați.</div> ) : (
                 chiriasiAfisati.map((ch, index) => (
                   <div key={ch.id || index} style={{ display: 'grid', gridTemplateColumns: '1.5fr 2fr 1.5fr 1fr', gap: '16px', alignItems: 'center', padding: '16px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)', fontSize: '14px', fontWeight: '500' }}>
                     
                     <div style={{ color: '#94A3B8', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {ch.adresa || 'Ap. 7, Bl. 2, Et. 1'}
+                      {ch.adresa || '—'}
                     </div>
                     
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
@@ -239,39 +244,32 @@ function Chiriasi() {
                     
                     <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                       <span style={{ fontSize: '12px', color: '#CBD5E1', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ch.email}</span>
-                      <span style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ch.telefon || '0771 876 111'}</span>
+                      <span style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ch.telefon || '—'}</span>
                     </div>
                     
                     <div style={{ fontWeight: '700', fontSize: '13px', color: '#E2E8F0', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      {ch.chirie ? `${ch.chirie} lei` : '750 lei'}
+                      {ch.chirie ? `${ch.chirie.toLocaleString('ro-RO')} lei` : '0 lei'}
                     </div>
 
                   </div>
                 ))
               )}
             </div>
-            
-            {chiriasiAfisati.length > 0 && (
-              <div style={{ textAlign: 'center', padding: '20px 0 10px', fontSize: '12px', color: '#CBD5E1', fontWeight: '500' }}>
-                &lt; 1 din 3 &gt;
-              </div>
-            )}
           </div>
         </div>
 
         <div className="stats-section">
-          <StatCard title="TOTAL CHIRIAȘI" value={chiriasi.length > 0 ? chiriasi.length : 36} subtitle="activi în prezent" valueColor="#1A2F45" subtitleColor="#93C5FD" bg="#ffffff" />
-          <StatCard title="CONTRACTE ACTIVE" value={chiriasi.length > 0 ? chiriasi.filter(c => c.activ === 1 || c.activ === true).length : 31} subtitle="5 expiră în 30 de zile" valueColor="#059669" subtitleColor="#34D399" bg="#ffffff" />
-          <StatCard title="RESTANȚE" value="6" subtitle="10.048 lei neîncasați" valueColor="#B45309" subtitleColor="#EA580C" bg="#ffffff" />
+          <StatCard title="TOTAL CHIRIAȘI" value={totalChiriasi} subtitle="activi în prezent" valueColor="#1A2F45" subtitleColor="#93C5FD" bg="#ffffff" />
+          <StatCard title="CONTRACTE ACTIVE" value={contracteActive} subtitle={`${contracteExpiraCurand} expiră în 30 de zile`} valueColor="#059669" subtitleColor="#34D399" bg="#ffffff" />
+          <StatCard title="RESTANȚE" value={numarRestante} subtitle={`${sumaRestante.toLocaleString('ro-RO')} lei neîncasați`} valueColor="#B45309" subtitleColor="#EA580C" bg="#ffffff" />
           
           <div style={{ background: '#2E435E', borderRadius: '12px', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
-            <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>Venituri Mai</div>
-            <div style={{ color: '#fff', fontSize: '40px', fontWeight: '800', lineHeight: 1 }}>23.568</div>
-            <div style={{ color: '#7FA1C3', fontSize: '12px', marginTop: '8px' }}>lei · 79% colectat</div>
+            <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>{`Venituri ${lunaCurenta}`}</div>
+            <div style={{ color: '#fff', fontSize: '40px', fontWeight: '800', lineHeight: 1 }}>{venituriTotale.toLocaleString('ro-RO')}</div>
+            <div style={{ color: '#7FA1C3', fontSize: '12px', marginTop: '8px' }}>lei · total chirii active</div>
           </div>
         </div>
 
-        {/* MODAL ADAUGARE REPARAT */}
         {isModalOpen && (
           <div className="modal-overlay">
             <div className="modal-card">

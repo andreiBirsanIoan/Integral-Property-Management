@@ -49,7 +49,7 @@ function Facturi() {
         },
         body: JSON.stringify({ 
           chirias_id: chiriasId, 
-          suma: suma, 
+          suma: parseFloat(suma), 
           descriere: descriere 
         })
       });
@@ -69,8 +69,6 @@ function Facturi() {
     }
   };
 
-  const isPlatita = (status) => status === 1 || status === true;
-  
   let facturiAfisate = [...facturi];
   if (sortOption === 'suma_desc') {
     facturiAfisate.sort((a, b) => parseFloat(b.suma || 0) - parseFloat(a.suma || 0));
@@ -78,22 +76,45 @@ function Facturi() {
     facturiAfisate.sort((a, b) => parseFloat(a.suma || 0) - parseFloat(b.suma || 0));
   }
 
-  const platiteCount = facturi.filter(f => isPlatita(f.platita)).length || 31;
-  const neplatiteCount = facturi.length > 0 ? facturi.length - platiteCount : 5;
-  const inAsteptareCount = 1;
-  const total = (platiteCount + neplatiteCount + inAsteptareCount) || 1;
-  
-  const procPlatite = Math.round((platiteCount / total) * 100) || 86;
-  const procNeplatite = Math.round((neplatiteCount / total) * 100) || 11;
-  const procInAsteptare = Math.round((inAsteptareCount / total) * 100) || 3;
+  // --- CALCULE STATISTICI ȘI STATUS DINAMICE ---
+  const totalFacturi = facturi.length;
 
-  const chartData = [
-    { luna: 'Ian', inaltime: '55%', culoare: '#C7DFF3' },
-    { luna: 'Feb', inaltime: '85%', culoare: '#A2C8EB' },
-    { luna: 'Mar', inaltime: '45%', culoare: '#7BA6D6' },
-    { luna: 'Apr', inaltime: '85%', culoare: '#4D6F97' },
-    { luna: 'Mai', inaltime: '85%', culoare: '#2B3958' },
-  ];
+  const platiteCount = facturi.filter(f => f.status === 'platita' || f.platita === 1 || f.platita === true).length;
+  const inAsteptareCount = facturi.filter(f => f.status === 'in_asteptare' || f.status === 'asteptare').length;
+  // Restul sunt considerate restanțe/neplătite pentru a asigura corelarea matematică perfectă
+  const neplatiteCount = Math.max(0, totalFacturi - platiteCount - inAsteptareCount);
+
+  const procPlatite = totalFacturi > 0 ? Math.round((platiteCount / totalFacturi) * 100) : 0;
+  const procNeplatite = totalFacturi > 0 ? Math.round((neplatiteCount / totalFacturi) * 100) : 0;
+  const procInAsteptare = totalFacturi > 0 ? Math.round((inAsteptareCount / totalFacturi) * 100) : 0;
+
+  // --- GENERARE DINAMICĂ GRAFIC BARS (Ianuarie - Mai) ---
+  const sumePeLuni = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }; // 0 = Ian, 4 = Mai
+  
+  facturi.forEach(f => {
+    if (f.data_emitere) {
+      const luna = new Date(f.data_emitere).getMonth();
+      if (luna >= 0 && luna <= 4) {
+        sumePeLuni[luna] += parseFloat(f.suma) || 0;
+      }
+    }
+  });
+
+  const valoareMaxima = Math.max(...Object.values(sumePeLuni), 1);
+  const luniLitere = ['Ian', 'Feb', 'Mar', 'Apr', 'Mai'];
+  const culoriGrafic = ['#C7DFF3', '#A2C8EB', '#7BA6D6', '#4D6F97', '#2B3958'];
+
+  const chartData = luniLitere.map((luna, index) => {
+    const sumaLuna = sumePeLuni[index];
+    const procentInaltime = Math.round((sumaLuna / valoareMaxima) * 100);
+    return {
+      luna,
+      inaltime: totalFacturi > 0 && sumaLuna > 0 ? `${Math.max(8, procentInaltime)}%` : '0%',
+      culoare: culoriGrafic[index]
+    };
+  });
+
+  const lunaCurentaNume = ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'][new Date().getMonth()];
 
   return (
     <>
@@ -135,7 +156,6 @@ function Facturi() {
           color: #1E293B; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
         }
 
-        /* --- STILURI MODAL REPARATE --- */
         .modal-overlay {
           position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); 
           display: flex; align-items: center; justify-content: center; z-index: 1000;
@@ -170,35 +190,17 @@ function Facturi() {
         }
         
         .modal-btn-save:hover { background: #172a6b; }
-        /* ------------------------------- */
 
         @media (max-width: 1024px) {
-          .facturi-container {
-            flex-direction: column; 
-            height: auto;
-          }
-          .stats-section {
-            width: 100%;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          }
+          .facturi-container { flex-direction: column; height: auto; }
+          .stats-section { width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
         }
 
         @media (max-width: 768px) {
-          .list-section {
-            padding: 16px;
-          }
-          .stats-section {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 80px; 
-          }
-          .dropdown-sort {
-            width: 100%;
-          }
-          .btn-adauga {
-            width: 100%;
-          }
+          .list-section { padding: 16px; }
+          .stats-section { display: flex; flex-direction: column; margin-bottom: 80px; }
+          .dropdown-sort { width: 100%; }
+          .btn-adauga { width: 100%; }
         }
       `}</style>
 
@@ -222,14 +224,13 @@ function Facturi() {
               </button>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#CBD5E1', fontWeight: '500', whiteSpace: 'nowrap' }}>
-              {facturi.length > 0 ? facturiAfisate.length : 36} înregistrări
+              {facturiAfisate.length} înregistrări
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '12px', marginBottom: '16px' }}>
             <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>Istoricul Plăților</h2>
-            <span style={{ color: '#93C5FD', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline' }}>Vezi toate</span>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', paddingRight: '5px' }}>
@@ -243,10 +244,10 @@ function Facturi() {
               </div>
 
               {loading ? ( <div style={{textAlign: 'center', padding: '40px 20px'}}>Se încarcă datele...</div> ) : 
-                facturiAfisate.length === 0 ? ( <div style={{textAlign: 'center', padding: '40px 20px', color: '#CBD5E1', fontSize: '15px', fontWeight: '500'}}>Nu s-au găsit facturi.</div> ) : (
+                facturiAfisate.length === 0 ? ( <div style={{textAlign: 'center', padding: '40px 20px', color: '#CBD5E1', fontSize: '15px', fontWeight: '500'}}>Nu s-au găsit facturi emise.</div> ) : (
                 facturiAfisate.map((f, index) => {
-                  const dataEmiterii = new Date(f.data_emitere || Date.now());
-                  const nrFactura = `FCT-${dataEmiterii.getFullYear()}-${(f.id || index + 5031).toString().padStart(4, '0')}`;
+                  const dataEmiterii = f.data_emitere ? new Date(f.data_emitere) : new Date();
+                  const nrFactura = `FCT-${dataEmiterii.getFullYear()}-${(f.id || index + 1).toString().padStart(4, '0')}`;
 
                   return (
                     <div key={f.id || index} style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr 1fr', gap: '16px', alignItems: 'center', padding: '16px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)', fontSize: '14px', fontWeight: '500' }}>
@@ -261,16 +262,16 @@ function Facturi() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                           <span style={{ fontWeight: '600', color: '#E2E8F0', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.nume || 'Nespecificat'}</span>
-                          <span style={{ fontSize: '10px', color: '#94A3B8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.descriere || 'Ap. 7B'}</span>
+                          <span style={{ fontSize: '10px', color: '#94A3B8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.descriere || '—'}</span>
                         </div>
                       </div>
                       
                       <div style={{ fontSize: '12px', color: '#E2E8F0', fontWeight: '500', textTransform: 'uppercase' }}>
-                        {f.data_emitere ? new Date(f.data_emitere).toLocaleDateString('ro-RO', { month: 'short', year: 'numeric' }) : 'MAI - 2026'}
+                        {f.data_emitere ? new Date(f.data_emitere).toLocaleDateString('ro-RO', { month: 'short', year: 'numeric' }) : '—'}
                       </div>
                       
                       <div style={{ fontWeight: '700', color: '#E2E8F0', fontSize: '13px', textAlign: 'right' }}>
-                        {f.suma ? `${parseFloat(f.suma).toLocaleString('ro-RO')} lei` : '750 lei'}
+                        {f.suma ? `${parseFloat(f.suma).toLocaleString('ro-RO')} lei` : '0 lei'}
                       </div>
 
                     </div>
@@ -278,23 +279,17 @@ function Facturi() {
                 })
               )}
             </div>
-            
-            {facturiAfisate.length > 0 && (
-              <div style={{ textAlign: 'center', padding: '20px 0 10px', fontSize: '12px', color: '#CBD5E1', fontWeight: '500' }}>
-                &lt; 1 din 3 &gt;
-              </div>
-            )}
           </div>
         </div>
 
         <div className="stats-section">
           
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
-            <h3 style={{ margin: '0 0 24px 0', fontSize: '18px', fontWeight: '700', color: '#1A2F45' }}>Încasări lunare 2026</h3>
+            <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: '700', color: '#1A2F45', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Încasări lunare {new Date().getFullYear()}</h3>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '120px', paddingBottom: '10px' }}>
               {chartData.map((bar, index) => (
                 <div key={index} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', width: '16%', height: '100%' }}>
-                  <div style={{ width: '100%', height: bar.inaltime, backgroundColor: bar.culoare, borderRadius: '2px 2px 0 0' }}></div>
+                  <div style={{ width: '100%', height: bar.inaltime, backgroundColor: bar.culoare, borderRadius: '4px 4px 0 0', transition: 'height 0.3s ease' }}></div>
                 </div>
               ))}
             </div>
@@ -306,7 +301,7 @@ function Facturi() {
           </div>
 
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
-            <h3 style={{ margin: '0 0 24px 0', fontSize: '18px', fontWeight: '700', color: '#1A2F45' }}>Status facturi mai</h3>
+            <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: '700', color: '#1A2F45', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Status general facturi</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
@@ -353,7 +348,6 @@ function Facturi() {
           </div>
         </div>
 
-        {/* ADAUGARE */}
         {isModalOpen && (
           <div className="modal-overlay">
             <div className="modal-card">
@@ -375,7 +369,7 @@ function Facturi() {
                 />
                 <input 
                   type="text" 
-                  placeholder="Descriere (ex: Chirie mai)" 
+                  placeholder="Descriere (ex: Chirie)" 
                   value={descriere} 
                   onChange={e => setDescriere(e.target.value)} 
                   className="modal-input" 
