@@ -117,18 +117,6 @@ function App() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
 
         *, *::before, *::after { box-sizing: border-box; }
-<<<<<<< HEAD
-       html, body, #root {
-  margin: 0 !important; padding: 0 !important;
-  width: 100vw !important; min-height: 100vh !important;
-  overflow: auto; background-color: #0B1320; 
-}
-
-        .layout-container {
-  display: flex; width: 100vw; min-height: 100vh;
-  font-family: 'Inter', sans-serif;
-}
-=======
         
         html, body, #root {
           margin: 0 !important; padding: 0 !important;
@@ -141,7 +129,6 @@ function App() {
           display: flex; width: 100vw; min-height: 100vh;
           font-family: 'Inter', sans-serif;
         }
->>>>>>> feature/rezolvare-probleme
 
         .left-panel {
           width: 44%;
