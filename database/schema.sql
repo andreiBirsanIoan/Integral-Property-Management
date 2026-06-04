@@ -26,15 +26,6 @@ CREATE TABLE IF NOT EXISTS apartamente (
 );
 
 CREATE TABLE IF NOT EXISTS chiriasi (
-
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE SET NULL,
-    apartament_id INT REFERENCES apartamente(id) ON DELETE SET NULL,
-    data_contract DATE NOT NULL,
-    data_expirare DATE,
-    document_path VARCHAR(500),
-    activ TINYINT(1) DEFAULT 1,
-
     id INT AUTO_INCREMENT PRIMARY  KEY,
     user_id INT REFERENCES users(id) ON DELETE SET NULL, 
     apartament_id INT REFERENCES apartamente(id) ON DELETE SET NULL, -- apartamentul in care sta
