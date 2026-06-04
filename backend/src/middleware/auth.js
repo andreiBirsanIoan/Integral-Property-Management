@@ -5,7 +5,7 @@ module.exports = (req, res, next) => {  //functie middleware, decide daca un req
   const token = authHeader && authHeader.split(' ')[1];//daca header-ul exista, imparte-l in doua parti folosind spatiul ca separator si ia a doua parte (tokenul propriu-zis). Daca header-ul nu exista, token va fi undefined
 
   if (!token) {//daca tokenul nu exista, returneaza eroare de autentificare
-    return res.status(401).json({ eroare: 'Token lipsă.' });
+    return res.status(401).json({ error: 'Token lipsă.' });
   }
 
   try { //daca token-ul exista, verifica-l folosind secretul definit in variabila de mediu JWT_SECRET. Daca token-ul e valid, decodeaza-l pentru a extrage informatiile despre utilizator si le ataseaza la obiectul req.user pentru a fi accesibile in rutele protejate. Apoi apeleaza next() pentru a permite request-ului sa continue catre ruta.
@@ -13,6 +13,6 @@ module.exports = (req, res, next) => {  //functie middleware, decide daca un req
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ eroare: 'Token invalid sau expirat.' });
+    return res.status(401).json({ error: 'Token invalid sau expirat.' });
   }
 };

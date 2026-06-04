@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   res.status(status).json({ 
-    eroare: err.message || 'Eroare internă server.' 
+    error: err.message || 'Eroare internă server.' 
   });
 });
 app.listen(PORT, () => {
