@@ -66,16 +66,16 @@ function App() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
 
         *, *::before, *::after { box-sizing: border-box; }
-        html, body, #root {
-          margin: 0 !important; padding: 0 !important;
-          width: 100vw !important; height: 100vh !important;
-          overflow: hidden; background-color: #0B1320; 
-        }
+       html, body, #root {
+  margin: 0 !important; padding: 0 !important;
+  width: 100vw !important; min-height: 100vh !important;
+  overflow: auto; background-color: #0B1320; 
+}
 
         .layout-container {
-          display: flex; width: 100vw; height: 100vh;
-          font-family: 'Inter', sans-serif;
-        }
+  display: flex; width: 100vw; min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
 
         .left-panel {
           width: 44%;
@@ -232,9 +232,12 @@ function App() {
 
         @media (max-width: 1024px) { .left-panel { padding: 40px; } }
         @media (max-width: 768px) {
-          .layout-container { flex-direction: column; height: auto; }
-          .left-panel, .right-panel { width: 100%; padding: 40px 24px; }
-        }
+  .layout-container { flex-direction: column; height: auto; }
+  .left-panel { display: none; }
+  .right-panel { width: 100%; min-height: 100vh; padding: 40px 24px; }
+}
+
+
       `}</style>
 
       <div className="layout-container">
