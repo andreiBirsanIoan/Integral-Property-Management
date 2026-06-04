@@ -1,4 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import {
+  ChevronDown,
+  Plus,
+  FileSpreadsheet,
+  TrendingUp,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Lock
+} from 'lucide-react';
 
 function Facturi() {
   const [facturi, setFacturi] = useState([]);
@@ -78,10 +88,8 @@ function Facturi() {
 
   // --- CALCULE STATISTICI ȘI STATUS DINAMICE ---
   const totalFacturi = facturi.length;
-
   const platiteCount = facturi.filter(f => f.status === 'platita' || f.platita === 1 || f.platita === true).length;
   const inAsteptareCount = facturi.filter(f => f.status === 'in_asteptare' || f.status === 'asteptare').length;
-  // Restul sunt considerate restanțe/neplătite pentru a asigura corelarea matematică perfectă
   const neplatiteCount = Math.max(0, totalFacturi - platiteCount - inAsteptareCount);
 
   const procPlatite = totalFacturi > 0 ? Math.round((platiteCount / totalFacturi) * 100) : 0;
@@ -89,7 +97,7 @@ function Facturi() {
   const procInAsteptare = totalFacturi > 0 ? Math.round((inAsteptareCount / totalFacturi) * 100) : 0;
 
   // --- GENERARE DINAMICĂ GRAFIC BARS (Ianuarie - Mai) ---
-  const sumePeLuni = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }; // 0 = Ian, 4 = Mai
+  const sumePeLuni = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }; 
   
   facturi.forEach(f => {
     if (f.data_emitere) {
@@ -114,8 +122,6 @@ function Facturi() {
     };
   });
 
-  const lunaCurentaNume = ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'][new Date().getMonth()];
-
   return (
     <>
       <style>{`
@@ -138,20 +144,22 @@ function Facturi() {
         }
         
         .top-actions-inputs {
-          display: flex; flex-wrap: wrap; gap: 16px; flex: 1 1 auto;
+          display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
         }
         
+        .dropdown-wrapper {
+          position: relative;
+          width: 190px;
+        }
+
         .dropdown-sort {
-          padding: 10px 16px; border-radius: 20px; border: none; background: #E2E8F0; 
-          color: #1E293B; font-weight: 600; outline: none; width: 180px; box-sizing: border-box; cursor: pointer;
+          padding: 10px 36px 10px 16px; border-radius: 20px; border: none; background: #E2E8F0; 
+          color: #1E293B; font-weight: 600; outline: none; width: 100%; box-sizing: border-box; cursor: pointer;
           appearance: none;
-          background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E293B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-          background-repeat: no-repeat;
-          background-position: right 12px center;
-          background-size: 16px;
         }
 
         .btn-adauga {
+          display: inline-flex; align-items: center; gap: 8px;
           padding: 10px 20px; border-radius: 20px; border: none; background: #E2E8F0; 
           color: #1E293B; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
         }
@@ -175,20 +183,16 @@ function Facturi() {
           background: #ffffff !important; color: #1E293B !important; width: 100%; box-sizing: border-box; font-size: 14px;
         }
         
-        .modal-input::placeholder {
-          color: #94A3B8 !important;
-        }
+        .modal-input::placeholder { color: #94A3B8 !important; }
 
         .modal-btn-cancel {
           flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #ffffff; color: #1E293B; cursor: pointer; font-weight: 600; transition: background 0.2s;
         }
-        
         .modal-btn-cancel:hover { background: #F1F5F9; }
         
         .modal-btn-save {
           flex: 1; padding: 12px; border-radius: 8px; border: none; background: #1E3A8A; color: #ffffff; cursor: pointer; font-weight: 600; transition: background 0.2s;
         }
-        
         .modal-btn-save:hover { background: #172a6b; }
 
         @media (max-width: 1024px) {
@@ -199,8 +203,8 @@ function Facturi() {
         @media (max-width: 768px) {
           .list-section { padding: 16px; }
           .stats-section { display: flex; flex-direction: column; margin-bottom: 80px; }
-          .dropdown-sort { width: 100%; }
-          .btn-adauga { width: 100%; }
+          .dropdown-wrapper { width: 100%; }
+          .btn-adauga { width: 100%; justify-content: center; }
         }
       `}</style>
 
@@ -210,22 +214,37 @@ function Facturi() {
           
           <div className="top-actions-wrapper">
             <div className="top-actions-inputs">
-              <select 
-                className="dropdown-sort"
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-              >
-                <option value="">Sortează după...</option>
-                <option value="suma_desc">Sumă (Descrescător)</option>
-                <option value="suma_asc">Sumă (Crescător)</option>
-              </select>
+              <div className="dropdown-wrapper">
+                <select 
+                  className="dropdown-sort"
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                >
+                  <option value="">Sortează după...</option>
+                  <option value="suma_desc">Sumă (Descrescător)</option>
+                  <option value="suma_asc">Sumă (Crescător)</option>
+                </select>
+                <ChevronDown
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    color: '#1E293B'
+                  }}
+                />
+              </div>
+
               <button onClick={() => setIsModalOpen(true)} className="btn-adauga">
-                + Adaugă factură
+                <Plus size={16} /> Adaugă factură
               </button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#CBD5E1', fontWeight: '500', whiteSpace: 'nowrap' }}>
-              {facturiAfisate.length} înregistrări
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#E2E8F0', fontWeight: '500', whiteSpace: 'nowrap' }}>
+              <span>{facturiAfisate.length} înregistrări</span>
+              <FileSpreadsheet size={16} style={{ opacity: 0.8 }} />
             </div>
           </div>
 
@@ -252,7 +271,7 @@ function Facturi() {
                   return (
                     <div key={f.id || index} style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr 1.5fr 1fr', gap: '16px', alignItems: 'center', padding: '16px 10px', borderBottom: '1px solid rgba(255,255,255,0.1)', fontSize: '14px', fontWeight: '500' }}>
                       
-                      <div style={{ color: '#94A3B8', fontSize: '12px', fontWeight: '500' }}>
+                      <div style={{ color: '#CBD5E1', fontSize: '12px', fontWeight: '500' }}>
                         {nrFactura}
                       </div>
                       
@@ -262,7 +281,7 @@ function Facturi() {
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                           <span style={{ fontWeight: '600', color: '#E2E8F0', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.nume || 'Nespecificat'}</span>
-                          <span style={{ fontSize: '10px', color: '#94A3B8', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.descriere || '—'}</span>
+                          <span style={{ fontSize: '11px', color: '#CBD5E1', opacity: 0.8, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.descriere || '—'}</span>
                         </div>
                       </div>
                       
@@ -284,8 +303,11 @@ function Facturi() {
 
         <div className="stats-section">
           
-          <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
-            <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: '700', color: '#1A2F45', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Încasări lunare {new Date().getFullYear()}</h3>
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '20px', right: '24px', opacity: 0.15, color: '#1A2F45' }}>
+              <TrendingUp size={24} />
+            </div>
+            <h3 style={{ margin: '0 0 24px 0', fontSize: '15px', fontWeight: '700', color: '#1A2F45', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Încasări lunare {new Date().getFullYear()}</h3>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '120px', paddingBottom: '10px' }}>
               {chartData.map((bar, index) => (
                 <div key={index} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', width: '16%', height: '100%' }}>
@@ -295,19 +317,21 @@ function Facturi() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
               {chartData.map((bar, index) => (
-                <div key={index} style={{ width: '16%', textAlign: 'center', fontSize: '11px', color: '#1A2F45', fontWeight: '600' }}>{bar.luna}</div>
+                <div key={index} style={{ width: '16%', textAlign: 'center', fontSize: '11px', color: '#1A2F45', fontWeight: '700' }}>{bar.luna}</div>
               ))}
             </div>
           </div>
 
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
-            <h3 style={{ margin: '0 0 24px 0', fontSize: '16px', fontWeight: '700', color: '#1A2F45', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Status general facturi</h3>
+            <h3 style={{ margin: '0 0 24px 0', fontSize: '15px', fontWeight: '700', color: '#1A2F45', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Status general facturi</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>
-                  <span style={{ color: '#1A2F45' }}>Plătite</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>
+                  <span style={{ color: '#1A2F45', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <CheckCircle2 size={14} color="#10B981" /> Plătite
+                  </span>
                   <span style={{ color: '#10B981' }}>{platiteCount} ({procPlatite}%)</span>
                 </div>
                 <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '4px' }}>
@@ -316,8 +340,10 @@ function Facturi() {
               </div>
               
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>
-                  <span style={{ color: '#D97706' }}>Restanță</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>
+                  <span style={{ color: '#D97706', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <AlertCircle size={14} color="#D97706" /> Restanță
+                  </span>
                   <span style={{ color: '#D97706' }}>{neplatiteCount} ({procNeplatite}%)</span>
                 </div>
                 <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '4px' }}>
@@ -326,9 +352,11 @@ function Facturi() {
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>
-                  <span style={{ color: '#1A2F45' }}>În așteptare</span>
-                  <span style={{ color: '#FBBF24' }}>{inAsteptareCount} ({procInAsteptare}%)</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: '600', marginBottom: '8px' }}>
+                  <span style={{ color: '#1A2F45', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Clock size={14} color="#FBBF24" /> În așteptare
+                  </span>
+                  <span style={{ color: '#B45309' }}>{inAsteptareCount} ({procInAsteptare}%)</span>
                 </div>
                 <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '4px' }}>
                   <div style={{ width: `${procInAsteptare}%`, height: '100%', background: '#FBBF24', borderRadius: '4px', transition: 'width 0.5s' }}></div>
@@ -339,8 +367,8 @@ function Facturi() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px' }}>
               <span style={{ fontSize: '12px', color: '#64748B', fontWeight: '500' }}>Procesat prin</span>
-              <div style={{ background: '#E2E8F0', padding: '6px 12px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: '600', color: '#1A2F45' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <div style={{ background: '#E2E8F0', padding: '6px 12px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: '#1A2F45' }}>
+                <Lock size={12} />
                 Netopia Payments
               </div>
             </div>
