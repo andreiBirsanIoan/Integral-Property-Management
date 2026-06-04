@@ -1,4 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import {
+  ChevronDown,
+  Plus,
+  Building2,
+  DoorOpen,
+  Home,
+  DollarSign
+} from 'lucide-react';
 
 function Apartamente() {
   const [apartamente, setApartamente] = useState([]);
@@ -121,15 +129,19 @@ function Apartamente() {
           display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
         }
         
+        .dropdown-wrapper {
+          position: relative;
+          width: 180px;
+        }
+
         .dropdown-sort {
-          padding: 10px 16px; border-radius: 20px; border: none; background: #E2E8F0; 
-          color: #1E293B; font-weight: 600; outline: none; width: 180px; cursor: pointer;
+          padding: 10px 36px 10px 16px; border-radius: 20px; border: none; background: #E2E8F0; 
+          color: #1E293B; font-weight: 600; outline: none; width: 100%; box-sizing: border-box; cursor: pointer;
           appearance: none;
-          background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E293B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-          background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
         }
 
         .btn-adauga {
+          display: inline-flex; align-items: center; gap: 8px;
           padding: 10px 20px; border-radius: 20px; border: none; background: #E2E8F0; 
           color: #1E293B; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
         }
@@ -149,12 +161,14 @@ function Apartamente() {
         }
 
         .modal-btn-cancel {
-          flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #fff; color: #1E293B; cursor: pointer; font-weight: 600;
+          flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #fff; color: #1E293B; cursor: pointer; font-weight: 600; transition: background 0.2s;
         }
+        .modal-btn-cancel:hover { background: #F1F5F9; }
         
         .modal-btn-save {
-          flex: 1; padding: 12px; border-radius: 8px; border: none; background: #1E3A8A; color: #fff; cursor: pointer; font-weight: 600;
+          flex: 1; padding: 12px; border-radius: 8px; border: none; background: #1E3A8A; color: #fff; cursor: pointer; font-weight: 600; transition: background 0.2s;
         }
+        .modal-btn-save:hover { background: #172a6b; }
 
         @media (max-width: 1024px) {
           .apartamente-container { flex-direction: column; height: auto; }
@@ -166,7 +180,8 @@ function Apartamente() {
           .stats-section { display: flex; flex-direction: column; margin-bottom: 80px; }
           .top-actions-wrapper { flex-direction: column-reverse; align-items: flex-start; }
           .top-actions-left { width: 100%; flex-direction: column; align-items: stretch; }
-          .dropdown-sort { width: 100%; }
+          .dropdown-wrapper { width: 100%; }
+          .btn-adauga { width: 100%; justify-content: center; }
         }
       `}</style>
 
@@ -176,19 +191,34 @@ function Apartamente() {
           
           <div className="top-actions-wrapper">
             <div className="top-actions-left">
-              <select 
-                className="dropdown-sort"
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-              >
-                <option value="">Sortează după...</option>
-                <option value="adresa_asc">Adresă (A-Z)</option>
-                <option value="adresa_desc">Adresă (Z-A)</option>
-              </select>
+              <div className="dropdown-wrapper">
+                <select
+                  className="dropdown-sort"
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                >
+                  <option value="">Sortează după...</option>
+                  <option value="adresa_asc">Adresă (A-Z)</option>
+                  <option value="adresa_desc">Adresă (Z-A)</option>
+                </select>
+                <ChevronDown
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    color: '#1E293B'
+                  }}
+                />
+              </div>
+
               <button onClick={() => setIsModalOpen(true)} className="btn-adauga">
-                + Adaugă apartament
+                <Plus size={16} /> Adaugă apartament
               </button>
             </div>
+            
             <div style={{ fontSize: '14px', fontWeight: '500', color: '#E2E8F0', whiteSpace: 'nowrap' }}>
               {apartamenteAfisate.length} apartamente
             </div>
@@ -251,11 +281,40 @@ function Apartamente() {
         </div>
 
         <div className="stats-section">
-          <StatCard title="TOTAL APARTAMENTE" value={totalApartamente} subtitle="Înregistrate în sistem" valueColor="#1A2F45" subtitleColor="#93C5FD" bg="#ffffff" />
-          <StatCard title="OCUPATE" value={`${rataOcupare}%`} subtitle="Rată de ocupare" valueColor="#059669" subtitleColor="#34D399" bg="#ffffff" />
-          <StatCard title="LIBERE" value={apartamenteLibere} subtitle="Disponibile" valueColor="#B45309" subtitleColor="#EA580C" bg="#ffffff" />
-          
-          <div style={{ background: '#2E435E', borderRadius: '12px', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
+          <StatCard
+            icon={<Building2 size={20} color="#60A5FA" />}
+            title="TOTAL APARTAMENTE"
+            value={totalApartamente}
+            subtitle="Înregistrate în sistem"
+            valueColor="#1A2F45"
+            subtitleColor="#93C5FD"
+            bg="#ffffff"
+          />
+
+          <StatCard
+            icon={<Home size={20} color="#059669" />}
+            title="OCUPATE"
+            value={`${rataOcupare}%`}
+            subtitle="Rată de ocupare"
+            valueColor="#059669"
+            subtitleColor="#34D399"
+            bg="#ffffff"
+          />
+
+          <StatCard
+            icon={<DoorOpen size={20} color="#B45309" />}
+            title="LIBERE"
+            value={apartamenteLibere}
+            subtitle="Disponibile"
+            valueColor="#B45309"
+            subtitleColor="#EA580C"
+            bg="#ffffff"
+          />
+
+          <div style={{ background: '#2E435E', borderRadius: '12px', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', boxSizing: 'border-box', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '16px', right: '16px', opacity: 0.2 }}>
+              <DollarSign size={40} color="#fff" />
+            </div>
             <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>Total Chirie Lunară</div>
             <div style={{ color: '#fff', fontSize: '40px', fontWeight: '800', lineHeight: 1 }}>{venituriTotale.toLocaleString('ro-RO')}</div>
             <div style={{ color: '#7FA1C3', fontSize: '12px', marginTop: '8px' }}>lei potențiali</div>
@@ -284,10 +343,11 @@ function Apartamente() {
   );
 }
 
-function StatCard({ title, value, subtitle, valueColor, subtitleColor, bg }) {
+function StatCard({ title, value, subtitle, valueColor, subtitleColor, bg, icon }) {
   return (
-    <div style={{ background: bg, borderRadius: '12px', padding: '28px 24px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-      <div style={{ color: '#60A5FA', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px' }}>{title}</div>
+    <div style={{ background: bg, borderRadius: '12px', padding: '24px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      {icon && <div style={{ marginBottom: '8px' }}>{icon}</div>}
+      <div style={{ color: '#60A5FA', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '8px' }}>{title}</div>
       <div style={{ color: valueColor, fontSize: '42px', fontWeight: '800', lineHeight: '1.2' }}>{value}</div>
       <div style={{ color: subtitleColor, fontSize: '13px', marginTop: '8px', fontWeight: '500' }}>{subtitle}</div>
     </div>

@@ -1,8 +1,19 @@
 import { useState } from 'react';
+import { 
+  Building2, 
+  Receipt, 
+  Wrench, 
+  User, 
+  Home, 
+  Mail, 
+  Lock, 
+  Phone,
+  Briefcase
+} from 'lucide-react';
 
 function App() {
   const [rol, setRol] = useState('chirias');
-  const [pagina, setPagina] = useState('login');
+  const [pagina, setPagina] = useState('login'); 
   const [email, setEmail] = useState('');
   const [parola, setParola] = useState('');
 
@@ -11,7 +22,26 @@ function App() {
   const [parolaReg, setParolaReg] = useState('');
   const [telefonReg, setTelefonReg] = useState('');
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const handleRegister = async () => {
+    if (!numeReg.trim()) {
+      alert('Numele este obligatoriu');
+      return;
+    }
+    if (!emailReg.trim()) {
+      alert('Emailul este obligatoriu');
+      return;
+    }
+    if (!emailRegex.test(emailReg)) {
+      alert('Formatul emailului este invalid');
+      return;
+    }
+    if (!parolaReg) {
+      alert('Parola este obligatorie');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:5000/api/auth/register', {
         method: 'POST',
@@ -21,14 +51,22 @@ function App() {
       const data = await response.json();
       
       if (response.ok) {
-        localStorage.clear();
-        if (data.token) {
-          localStorage.setItem('token', data.token);
+        const loginResponse = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailReg, parola: parolaReg })
+        });
+        const loginData = await loginResponse.json();
+
+        if (loginResponse.ok) {
+          localStorage.setItem('token', loginData.token);
+          localStorage.setItem('nume', loginData.nume); 
+          localStorage.setItem('rol', loginData.rol);
+          localStorage.setItem('email', emailReg); 
+          window.location.href = '/dashboard';
+        } else {
+          setPagina('login');
         }
-        localStorage.setItem('nume', data.nume || numeReg); 
-        localStorage.setItem('rol', data.rol || rol);
-        localStorage.setItem('email', emailReg); 
-        window.location.href = '/dashboard';
       } else {
         alert(data.eroare || 'Eroare la înregistrare');
       }
@@ -38,6 +76,19 @@ function App() {
   };
 
   const handleLogin = async () => {
+    if (!email.trim()) {
+      alert('Emailul este obligatoriu');
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      alert('Formatul emailului este invalid');
+      return;
+    }
+    if (!parola) {
+      alert('Parola este obligatorie');
+      return;
+    }
+
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
@@ -66,6 +117,7 @@ function App() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
 
         *, *::before, *::after { box-sizing: border-box; }
+<<<<<<< HEAD
        html, body, #root {
   margin: 0 !important; padding: 0 !important;
   width: 100vw !important; min-height: 100vh !important;
@@ -76,6 +128,20 @@ function App() {
   display: flex; width: 100vw; min-height: 100vh;
   font-family: 'Inter', sans-serif;
 }
+=======
+        
+        html, body, #root {
+          margin: 0 !important; padding: 0 !important;
+          width: 100vw !important; min-height: 100vh !important;
+          overflow-x: hidden;
+          background-color: #0B1320; 
+        }
+
+        .layout-container {
+          display: flex; width: 100vw; min-height: 100vh;
+          font-family: 'Inter', sans-serif;
+        }
+>>>>>>> feature/rezolvare-probleme
 
         .left-panel {
           width: 44%;
@@ -172,6 +238,7 @@ function App() {
 
         .role-btn.active {
           font-weight: 600;
+          color: darkblue;
         }
 
         .tab-divider {
@@ -230,14 +297,41 @@ function App() {
           color: #4B5A6D; font-weight: 600; cursor: pointer; text-decoration: underline;
         }
 
-        @media (max-width: 1024px) { .left-panel { padding: 40px; } }
+        @media (max-width: 1024px) { 
+          .left-panel { padding: 40px; width: 40%; } 
+          .right-panel { width: 60%; }
+        }
+        
         @media (max-width: 768px) {
-  .layout-container { flex-direction: column; height: auto; }
-  .left-panel { display: none; }
-  .right-panel { width: 100%; min-height: 100vh; padding: 40px 24px; }
-}
-
-
+          html, body, #root { overflow-y: auto !important; height: auto !important; }
+          .layout-container { flex-direction: column; height: auto; }
+          
+          .left-panel { 
+            width: 100%; 
+            padding: 40px 24px; 
+            align-items: center; 
+            text-align: center; 
+          }
+          .left-content { 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+          }
+          .logo-img { margin-left: 0; width: 220px; margin-bottom: 30px; }
+          .hero-title { font-size: 24px; margin-bottom: 30px; }
+          
+          .feature-item { justify-content: center; text-align: left; }
+          .feature-list { gap: 20px; margin-bottom: 30px; }
+          
+          .right-panel { 
+            width: 100%; 
+            padding: 50px 24px; 
+            min-height: auto;
+          }
+          .form-container { max-width: 100%; }
+          .submit-btn { width: 100%; } 
+        }
       `}</style>
 
       <div className="layout-container">
@@ -252,36 +346,17 @@ function App() {
             
             <div className="feature-list">
               <div className="feature-item">
-                <svg className="feature-icon" viewBox="0 0 24 24">
-                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                  <path d="M9 22v-4h6v4"></path>
-                  <path d="M8 6h.01"></path><path d="M16 6h.01"></path>
-                  <path d="M12 6h.01"></path><path d="M12 10h.01"></path>
-                  <path d="M12 14h.01"></path><path d="M16 10h.01"></path>
-                  <path d="M16 14h.01"></path><path d="M8 10h.01"></path>
-                  <path d="M8 14h.01"></path>
-                </svg>
+                <Building2 className="feature-icon" />
                 <span className="feature-text">Management complet apartamente</span>
               </div>
               
               <div className="feature-item">
-                <svg className="feature-icon" viewBox="0 0 24 24">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
+                <Receipt className="feature-icon" />
                 <span className="feature-text">Facturi și plăți automate</span>
               </div>
               
               <div className="feature-item">
-                <svg className="feature-icon" viewBox="0 0 24 24">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
+                <Wrench className="feature-icon" />
                 <span className="feature-text">Tichete de mentenanță</span>
               </div>
             </div>
@@ -295,7 +370,7 @@ function App() {
           <div className="overlay"></div>
           
           <div className="form-container">
-            {pagina === 'login' ? (
+            {pagina === 'login' && (
               <>
                 <h2 className="form-title">Bun venit înapoi!</h2>
                 <p className="form-subtitle">Conectează-te la contul tău</p>
@@ -303,12 +378,10 @@ function App() {
                 <div className="tabs-container">
                   <div className="role-tabs">
                     <button onClick={() => setRol('chirias')} className={`role-btn ${rol === 'chirias' ? 'active' : ''}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                       Chiriaș
                     </button>
                     <div className="tab-divider"></div>
                     <button onClick={() => setRol('proprietar')} className={`role-btn ${rol === 'proprietar' ? 'active' : ''}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                       Proprietar
                     </button>
                   </div>
@@ -317,7 +390,7 @@ function App() {
                 <div className="input-group">
                   <label className="input-label">Email</label>
                   <div className="input-box">
-                    <svg className="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <Mail className="input-icon" />
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@imp.com" />
                   </div>
                 </div>
@@ -325,7 +398,7 @@ function App() {
                 <div className="input-group">
                   <label className="input-label">Parola</label>
                   <div className="input-box">
-                    <svg className="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <Lock className="input-icon" />
                     <input type="password" value={parola} onChange={(e) => setParola(e.target.value)} placeholder="••••••••" />
                   </div>
                 </div>
@@ -333,11 +406,13 @@ function App() {
                 <button onClick={handleLogin} className="submit-btn">Autentificare</button>
 
                 <div className="form-footer">
-                  <span className="forgot-pass">Ai uitat parola?</span>
+                  <span className="forgot-pass" onClick={() => window.location.href = '/forgot_password'}>Ai uitat parola?</span>
                   <span>Nu ai cont? <span onClick={() => setPagina('register')} className="action-link">Înregistrează-te.</span></span>
                 </div>
               </>
-            ) : (
+            )}
+
+            {pagina === 'register' && (
               <>
                 <h2 className="form-title">Creează cont</h2>
                 <p className="form-subtitle">Completează datele de mai jos</p>
@@ -345,12 +420,12 @@ function App() {
                 <div className="tabs-container">
                   <div className="role-tabs">
                     <button onClick={() => setRol('chirias')} className={`role-btn ${rol === 'chirias' ? 'active' : ''}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                      <User size={16} strokeWidth={2} />
                       Chiriaș
                     </button>
                     <div className="tab-divider"></div>
                     <button onClick={() => setRol('proprietar')} className={`role-btn ${rol === 'proprietar' ? 'active' : ''}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                      <Home size={16} strokeWidth={2} />
                       Proprietar
                     </button>
                   </div>
@@ -359,7 +434,7 @@ function App() {
                 <div className="input-group" style={{ marginBottom: '16px' }}>
                   <label className="input-label">Nume complet</label>
                   <div className="input-box" style={{ padding: '12px 16px' }}>
-                    <svg className="input-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <User className="input-icon" />
                     <input value={numeReg} onChange={(e) => setNumeReg(e.target.value)} placeholder="Maria Ionescu" />
                   </div>
                 </div>
@@ -367,7 +442,7 @@ function App() {
                 <div className="input-group" style={{ marginBottom: '16px' }}>
                   <label className="input-label">Email</label>
                   <div className="input-box" style={{ padding: '12px 16px' }}>
-                    <svg className="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <Mail className="input-icon" />
                     <input value={emailReg} onChange={(e) => setEmailReg(e.target.value)} placeholder="maria@ipm.ro" />
                   </div>
                 </div>
@@ -375,16 +450,34 @@ function App() {
                 <div className="input-group" style={{ marginBottom: '16px' }}>
                   <label className="input-label">Telefon</label>
                   <div className="input-box" style={{ padding: '12px 16px' }}>
-                    <svg className="input-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <Phone className="input-icon" />
                     <input value={telefonReg} onChange={(e) => setTelefonReg(e.target.value)} placeholder="0700 000 000" />
                   </div>
                 </div>
-
-                <div className="input-group">
+                
+                <div className="input-group" style={{ marginBottom: '16px' }}>
                   <label className="input-label">Parola</label>
                   <div className="input-box" style={{ padding: '12px 16px' }}>
-                    <svg className="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    <Lock className="input-icon" />
                     <input type="password" value={parolaReg} onChange={(e) => setParolaReg(e.target.value)} placeholder="••••••••" />
+                  </div>
+                </div>
+
+                <div className="input-group" style={{ marginBottom: '16px' }}>
+                  <label className="input-label">Rol</label>
+                  <div className="input-box" style={{ padding: '12px 16px' }}>
+                    <Briefcase className="input-icon" />
+                    <select 
+                      value={rol} 
+                      onChange={(e) => setRol(e.target.value)}
+                      style={{ 
+                        width: '100%', background: 'transparent', border: 'none', outline: 'none', 
+                        fontSize: '14px', color: '#162032', fontFamily: 'Inter, sans-serif', cursor: 'pointer'
+                      }}
+                    >
+                      <option value="chirias">Chiriaș</option>
+                      <option value="proprietar">Proprietar</option>
+                    </select>
                   </div>
                 </div>
 

@@ -1,4 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  ChevronDown, 
+  Plus, 
+  Users, 
+  FileCheck, 
+  AlertTriangle, 
+  Coins,
+  Calendar,
+  Building,
+  Mail
+} from 'lucide-react';
 
 function Chiriasi() {
   const [chiriasi, setChiriasi] = useState([]);
@@ -76,12 +87,9 @@ function Chiriasi() {
     chiriasiAfisati.sort((a, b) => (b.nume || '').localeCompare(a.nume || ''));
   }
 
-
   const totalChiriasi = chiriasi.length;
-
   const contracteActive = chiriasi.filter(c => c.activ === 1 || c.activ === true || c.activ === undefined).length;
   
-
   const contracteExpiraCurand = chiriasi.filter(c => {
     if (!c.data_expirare) return false;
     const dataExp = new Date(c.data_expirare);
@@ -93,11 +101,8 @@ function Chiriasi() {
 
   const numarRestante = chiriasi.filter(c => (c.restanta || 0) > 0).length;
   const sumaRestante = chiriasi.reduce((sum, c) => sum + (parseFloat(c.restanta) || 0), 0);
-
-  // Venituri totale din chiriile lunare curente
   const venituriTotale = chiriasi.reduce((sum, c) => sum + (parseFloat(c.chirie) || 0), 0);
   
-  // Obținem dinamic numele lunii curente
   const luni = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
   const lunaCurenta = luni[new Date().getMonth()];
 
@@ -126,17 +131,19 @@ function Chiriasi() {
           display: flex; flex-wrap: wrap; gap: 16px; flex: 1 1 auto;
         }
         
+        .dropdown-wrapper {
+          position: relative;
+          width: 180px;
+        }
+
         .dropdown-sort {
-          padding: 10px 16px; border-radius: 20px; border: none; background: #E2E8F0; 
-          color: #1E293B; font-weight: 600; outline: none; width: 180px; box-sizing: border-box; cursor: pointer;
+          padding: 10px 36px 10px 16px; border-radius: 20px; border: none; background: #E2E8F0; 
+          color: #1E293B; font-weight: 600; outline: none; width: 100%; box-sizing: border-box; cursor: pointer;
           appearance: none;
-          background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E293B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-          background-repeat: no-repeat;
-          background-position: right 12px center;
-          background-size: 16px;
         }
 
         .btn-adauga {
+          display: inline-flex; align-items: center; gap: 8px;
           padding: 10px 20px; border-radius: 20px; border: none; background: #E2E8F0; 
           color: #1E293B; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
         }
@@ -184,8 +191,8 @@ function Chiriasi() {
         @media (max-width: 768px) {
           .list-section { padding: 16px; }
           .stats-section { display: flex; flex-direction: column; margin-bottom: 80px; }
-          .dropdown-sort { width: 100%; }
-          .btn-adauga { width: 100%; }
+          .dropdown-wrapper { width: 100%; }
+          .btn-adauga { width: 100%; justify-content: center; }
         }
       `}</style>
 
@@ -195,17 +202,24 @@ function Chiriasi() {
           
           <div className="top-actions-wrapper">
             <div className="top-actions-inputs">
-              <select 
-                className="dropdown-sort"
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-              >
-                <option value="">Sortează după...</option>
-                <option value="nume_asc">Nume (A-Z)</option>
-                <option value="nume_desc">Nume (Z-A)</option>
-              </select>
+              <div className="dropdown-wrapper">
+                <select 
+                  className="dropdown-sort"
+                  value={sortOption}
+                  onChange={(e) => setSortOption(e.target.value)}
+                >
+                  <option value="">Sortează după...</option>
+                  <option value="nume_asc">Nume (A-Z)</option>
+                  <option value="nume_desc">Nume (Z-A)</option>
+                </select>
+                <ChevronDown 
+                  size={16} 
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#1E293B', pointerEvents: 'none' }} 
+                />
+              </div>
+              
               <button onClick={() => setIsModalOpen(true)} className="btn-adauga">
-                + Adaugă chiriaș
+                <Plus size={18} /> Adaugă chiriaș
               </button>
             </div>
             <div style={{ fontSize: '14px', fontWeight: '500', color: '#CBD5E1', whiteSpace: 'nowrap' }}>
@@ -259,11 +273,14 @@ function Chiriasi() {
         </div>
 
         <div className="stats-section">
-          <StatCard title="TOTAL CHIRIAȘI" value={totalChiriasi} subtitle="activi în prezent" valueColor="#1A2F45" subtitleColor="#93C5FD" bg="#ffffff" />
-          <StatCard title="CONTRACTE ACTIVE" value={contracteActive} subtitle={`${contracteExpiraCurand} expiră în 30 de zile`} valueColor="#059669" subtitleColor="#34D399" bg="#ffffff" />
-          <StatCard title="RESTANȚE" value={numarRestante} subtitle={`${sumaRestante.toLocaleString('ro-RO')} lei neîncasați`} valueColor="#B45309" subtitleColor="#EA580C" bg="#ffffff" />
+          <StatCard icon={<Users size={20} color="#60A5FA" />} title="TOTAL CHIRIAȘI" value={totalChiriasi} subtitle="activi în prezent" valueColor="#1A2F45" subtitleColor="#93C5FD" bg="#ffffff" />
+          <StatCard icon={<FileCheck size={20} color="#059669" />} title="CONTRACTE ACTIVE" value={contracteActive} subtitle={`${contracteExpiraCurand} expiră în 30 de zile`} valueColor="#059669" subtitleColor="#34D399" bg="#ffffff" />
+          <StatCard icon={<AlertTriangle size={20} color="#B45309" />} title="RESTANȚE" value={numarRestante} subtitle={`${sumaRestante.toLocaleString('ro-RO')} lei neîncasați`} valueColor="#B45309" subtitleColor="#EA580C" bg="#ffffff" />
           
-          <div style={{ background: '#2E435E', borderRadius: '12px', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
+          <div style={{ background: '#2E435E', borderRadius: '12px', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', boxSizing: 'border-box', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '16px', right: '16px', opacity: 0.2 }}>
+              <Coins size={40} color="#fff" />
+            </div>
             <div style={{ color: '#7FA1C3', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px', textTransform: 'uppercase', textAlign: 'center' }}>{`Venituri ${lunaCurenta}`}</div>
             <div style={{ color: '#fff', fontSize: '40px', fontWeight: '800', lineHeight: 1 }}>{venituriTotale.toLocaleString('ro-RO')}</div>
             <div style={{ color: '#7FA1C3', fontSize: '12px', marginTop: '8px' }}>lei · total chirii active</div>
@@ -309,10 +326,11 @@ function Chiriasi() {
   );
 }
 
-function StatCard({ title, value, subtitle, valueColor, subtitleColor, bg }) {
+function StatCard({ icon, title, value, subtitle, valueColor, subtitleColor, bg }) {
   return (
-    <div style={{ background: bg, borderRadius: '12px', padding: '28px 24px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-      <div style={{ color: '#60A5FA', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '12px' }}>{title}</div>
+    <div style={{ background: bg, borderRadius: '12px', padding: '24px', textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      {icon && <div style={{ marginBottom: '8px' }}>{icon}</div>}
+      <div style={{ color: '#60A5FA', fontSize: '11px', fontWeight: '700', letterSpacing: '0.05em', marginBottom: '8px' }}>{title}</div>
       <div style={{ color: valueColor, fontSize: '42px', fontWeight: '800', lineHeight: '1.2' }}>{value}</div>
       <div style={{ color: subtitleColor, fontSize: '13px', marginTop: '8px', fontWeight: '500' }}>{subtitle}</div>
     </div>
