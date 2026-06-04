@@ -116,6 +116,43 @@ function Chiriasi() {
           color: #1E293B; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
         }
 
+        /* --- STILURI MODAL REPARATE --- */
+        .modal-overlay {
+          position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); 
+          display: flex; align-items: center; justify-content: center; z-index: 1000;
+        }
+        
+        .modal-card {
+          background: #ffffff; padding: 32px; border-radius: 16px; width: 90%; max-width: 400px; 
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); box-sizing: border-box;
+        }
+
+        .modal-title {
+          margin: 0 0 20px 0; font-size: 20px; font-weight: 700; color: #1E293B;
+        }
+
+        .modal-input {
+          padding: 12px; border-radius: 8px; border: 1px solid #CBD5E1; outline: none; 
+          background: #ffffff !important; color: #1E293B !important; width: 100%; box-sizing: border-box; font-size: 14px;
+        }
+        
+        .modal-input::placeholder {
+          color: #94A3B8 !important;
+        }
+
+        .modal-btn-cancel {
+          flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #CBD5E1; background: #ffffff; color: #1E293B; cursor: pointer; font-weight: 600; transition: background 0.2s;
+        }
+        
+        .modal-btn-cancel:hover { background: #F1F5F9; }
+        
+        .modal-btn-save {
+          flex: 1; padding: 12px; border-radius: 8px; border: none; background: #1E3A8A; color: #ffffff; cursor: pointer; font-weight: 600; transition: background 0.2s;
+        }
+        
+        .modal-btn-save:hover { background: #172a6b; }
+        /* ------------------------------- */
+
         @media (max-width: 1024px) {
           .chiriasi-container {
             flex-direction: column; 
@@ -165,7 +202,7 @@ function Chiriasi() {
                 + Adaugă chiriaș
               </button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#CBD5E1', fontWeight: '500', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: '14px', fontWeight: '500', color: '#CBD5E1', whiteSpace: 'nowrap' }}>
               {chiriasi.length > 0 ? chiriasiAfisati.length : 36} chiriași
             </div>
           </div>
@@ -234,17 +271,36 @@ function Chiriasi() {
           </div>
         </div>
 
+        {/* MODAL ADAUGARE REPARAT */}
         {isModalOpen && (
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-            <div style={{ background: '#fff', padding: '32px', borderRadius: '16px', width: '90%', maxWidth: '400px', color: '#1A2F45', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', boxSizing: 'border-box' }}>
-              <h2 style={{ margin: '0 0 20px 0', fontSize: '20px' }}>Adaugă Chiriaș</h2>
+          <div className="modal-overlay">
+            <div className="modal-card">
+              <h2 className="modal-title">Adaugă Chiriaș</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <input type="email" placeholder="Email utilizator existent" value={emailUtilizator} onChange={e => setEmailUtilizator(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', outline: 'none' }} />
-                <input type="text" placeholder="ID Apartament" value={apartamentId} onChange={e => setApartamentId(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', outline: 'none' }} />
-                <input type="date" placeholder="Data Expirare Contract" value={dataExpirare} onChange={e => setDataExpirare(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', outline: 'none' }} />
+                <input 
+                  type="email" 
+                  placeholder="Email utilizator existent" 
+                  value={emailUtilizator} 
+                  onChange={e => setEmailUtilizator(e.target.value)} 
+                  className="modal-input" 
+                />
+                <input 
+                  type="text" 
+                  placeholder="ID Apartament" 
+                  value={apartamentId} 
+                  onChange={e => setApartamentId(e.target.value)} 
+                  className="modal-input" 
+                />
+                <input 
+                  type="date" 
+                  placeholder="Data Expirare Contract" 
+                  value={dataExpirare} 
+                  onChange={e => setDataExpirare(e.target.value)} 
+                  className="modal-input" 
+                />
                 <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
-                  <button onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', background: '#fff', cursor: 'pointer', fontWeight: '600' }}>Anulează</button>
-                  <button onClick={handleSave} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#1E3A8A', color: '#fff', cursor: 'pointer', fontWeight: '600' }}>Salvează</button>
+                  <button onClick={() => setIsModalOpen(false)} className="modal-btn-cancel">Anulează</button>
+                  <button onClick={handleSave} className="modal-btn-save">Salvează</button>
                 </div>
               </div>
             </div>
